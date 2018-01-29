@@ -1,0 +1,19 @@
+{
+	"extends": "eslint:recommended",
+	"rules" : {
+		"semi": [ "never" ]
+	},
+	"env": {
+		"commonjs": true,
+		"es6": true,
+		"jest": true,
+		"node": true
+	},
+	"parser": "typescript-eslint-parser",
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"modules": true
+		}
+	}
+}
