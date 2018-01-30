@@ -11,43 +11,48 @@ import {
 	Permissions, 
 } from 'expo'
 
-import MapView from 'react-native-maps'
+import { NavigationScreenProps } from 'react-navigation'
 
-import { Region } from '../utils/MapTypes'
+/* NOTE:
+ - MapView.prototype.onPress
+	- Documentation and d.ts file are wrong about the callback.
+	- Expected: (coordinate: LatLng, position: Point) => void
+	- Actual: (e) => void, where e.nativeEvent = { coordinate, position }
+	- This will likely be found again using other parts of the API.
+*/
+import MapView, { Marker, MarkerProps } from 'react-native-maps'
+
+import { Region, LatLng, Point } from '../utils/Maps'
+import SimpleText from '../components/SimpleText';
 
 const styles = StyleSheet.create ({
-	container: {
+	header: {
 		flex: 1,
-		backgroundColor: 'black',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	text: {
-		flex: 1,
-		color: 'white',
-		fontSize: 40,
-		textAlign: 'center',
-		textAlignVertical: 'center',
 	},
 	map: {
-		flex: 1,
+		flex: 11,
 	}
 })
 
-interface Props {
-	navigation: any,
-}
+type Props = NavigationScreenProps<{
+	region: Region,
+}>
+
 interface State {
-	initialRegion: Region|null, 
-	region: Region|null,
-	error: Error|null,
+	initialRegion: Region,
+	currentRegion: Region,
+	error: Error | null,
 }
 
 class PlacerScreen extends Component<Props, State> {
-	state:State = {
-		initialRegion: null,
-		region: null,
-		error: null,
+	constructor (props:Props) {
+		super (props)
+		const { region } = this.props.navigation.state.params
+		this.state = {
+			initialRegion: region,
+			currentRegion: region,
+			error: null,
+		}
 	}
 
 	componentWillMount () {
@@ -67,35 +72,47 @@ class PlacerScreen extends Component<Props, State> {
 			initialRegion: {
 				latitude: location.coords.latitude,
 				longitude: location.coords.longitude,
-				latitudeDelta: 0,
-				longitudeDelta: 0,
+				latitudeDelta: 0.02,
+				longitudeDelta: 0.02,
 			}
 		})
 	}
+	
+	addMarker (pressCoord:LatLng) {
+		const region = this.state.initialRegion
+		const coord:LatLng = {
+			latitude: pressCoord.latitude,
+			longitude: pressCoord.longitude
+		}
+		this.props.navigation.navigate ('Finder', { region, coord })
+	}
 
 	updateRegion (region:Region) {
-		this.setState ({ region })
+		this.setState ({ 
+			currentRegion: region 
+		})
 	}
 
 	render () {
-		if (this.state.error) return (
-			<View style={styles.container}> 
-				<Text style={styles.text}> 
-					{ this.state.error.message } 
-				</Text>
-			</View>
+		const {
+			initialRegion,
+			currentRegion,
+			error,
+		} = this.state
+
+		if (error) return (
+			<SimpleText text={`Error: ${error.message}`} />
 		)
-		else if (this.state.initialRegion) return (
+		
+		return (
 			<MapView 
 				style={styles.map} 
-				initialRegion={this.state.initialRegion}
-				onRegionChange={(reg:any) => this.updateRegion(reg)} 
+				initialRegion={initialRegion}
+				onRegionChange={(reg:Region) => this.updateRegion(reg)}
+				onPress={(e:any) => {
+					this.addMarker (e.nativeEvent.coordinate)
+				}}
 			/>
-		)
-		else return (
-			<View style={styles.container}>
-				<Text style={styles.text}> Loading... </Text>
-			</View>
 		)
 	}
 }

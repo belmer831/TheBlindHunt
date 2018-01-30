@@ -6,9 +6,13 @@ import {
 	View,
 } from 'react-native'
 
-import { NavigationScene } from 'react-navigation'
+import { Location, Permissions } from 'expo'
+import { NavigationScreenProps } from 'react-navigation'
 
 import ClearButton from '../components/ClearButton'
+import SimpleText from '../components/SimpleText'
+
+import { delta, getLocationAsync } from '../utils/Maps'
 
 const styles = StyleSheet.create ({
 	container: {
@@ -17,49 +21,69 @@ const styles = StyleSheet.create ({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	area: {
-		flex: 1,
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
 	title: {
 		flex: 1,
 		color: 'white',
 		fontSize: 40,
 		textAlign: 'center',
 		textAlignVertical: 'center',
-	}
+	},
+	start: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
 })
 
-const Padding = () => <View style={{ flex: 0.5 }} />
+type Props = NavigationScreenProps<{}>
 
-interface Props {
-	navigation: any,
+interface State {
+	error: Error | null,
 }
 
-class HomeScreen extends Component<Props> {
-	toPlacer () {
-		this.props.navigation.navigate ('Placer')
+class HomeScreen extends Component<Props, State> {
+	constructor (props:Props) {
+		super (props)
+		this.state = {
+			error: null,
+		}
+	}
+
+	async toPlacer () {
+		try {
+			const { latitude, longitude } = await getLocationAsync()
+			this.props.navigation.navigate ('Placer', { 
+				region: {
+					latitude: latitude,
+					longitude: longitude,
+					latitudeDelta: delta,
+					longitudeDelta: delta,
+				} 
+			})
+		}
+		catch (err) {
+			this.setState ({ 
+				error: err
+			})
+		}
 	}
 
 	render() {
-		return (
+		const { error } = this.state
+
+		if (error) return (
+			<SimpleText text={error.message}/>
+		)
+		else return (
 			<View style={styles.container}>
-				<Padding />
-
-				<View style={styles.area}>
-					<Text style={styles.title}> 
-						The Blind Hunt 
-					</Text>
-				</View>
-
-				<View style={styles.area}>
+				<Text style={styles.title}>
+					The Blind Hunt
+				</Text>
+				<View style={styles.start}>
 					<ClearButton
 						text={"Start"}
 						onPress={() => this.toPlacer()} />
 				</View>
-
-				<Padding />
 			</View>
 		)
 	}

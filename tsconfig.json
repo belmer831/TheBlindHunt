@@ -17,8 +17,7 @@
 		"noImplicitReturns": true,
 		"preserveConstEnums": true,
 		"removeComments": true,
-		"strict": true,
-		"strictNullChecks": true
+		"strictNullChecks": true,
 	},
 	"include": [ "src" ]
 }
