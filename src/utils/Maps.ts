@@ -1,5 +1,3 @@
-import { Location, Permissions } from 'expo'
-
 export const delta = 0.02
 export const targetRadius = 10
 const earthRadius = 6371000
@@ -60,16 +58,3 @@ export function calcDistance (alpha:LatLng, bravo:LatLng) {
 	return earthRadius * c
 }
 
-export async function getLocationAsync():Promise<LatLng> {
-	let { status } = await Permissions.askAsync ('location')
-	if (status !== 'granted') {
-		throw new Error ('Permission to access location was denied')
-	}
-
-	let location = await Location.getCurrentPositionAsync({})
-	if (location) return {
-		latitude: location.coords.latitude,
-		longitude: location.coords.longitude
-	}
-	else throw new Error ("Location service failed to provide coordinates")
-}

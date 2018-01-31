@@ -54,29 +54,6 @@ class PlacerScreen extends Component<Props, State> {
 			error: null,
 		}
 	}
-
-	componentWillMount () {
-		if (! this.state.initialRegion) this.getLocationAsync()
-	}
-	
-	async getLocationAsync () {
-		let { status } = await Permissions.askAsync ('location')
-		if (status !== 'granted') {
-			this.setState ({
-				error: new Error ('Permission to access location was denied')
-			})
-		}
-
-		let location = await Location.getCurrentPositionAsync({})
-		if (location) this.setState ({
-			initialRegion: {
-				latitude: location.coords.latitude,
-				longitude: location.coords.longitude,
-				latitudeDelta: 0.02,
-				longitudeDelta: 0.02,
-			}
-		})
-	}
 	
 	addMarker (pressCoord:LatLng) {
 		const region = this.state.initialRegion

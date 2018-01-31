@@ -12,7 +12,7 @@ import { NavigationScreenProps } from 'react-navigation'
 import ClearButton from '../components/ClearButton'
 import SimpleText from '../components/SimpleText'
 
-import { delta, getLocationAsync } from '../utils/Maps'
+import { delta } from '../utils/Maps'
 
 const styles = StyleSheet.create ({
 	container: {
@@ -51,7 +51,22 @@ class HomeScreen extends Component<Props, State> {
 
 	async toPlacer () {
 		try {
-			const { latitude, longitude } = await getLocationAsync()
+			let { status } = await Permissions.askAsync('location')
+			if (status !== 'granted') {
+				throw new Error ("Location Permission Not Granted")
+			}
+
+			/*
+			const ps = await Location.getProviderStatusAsync()
+			if (! ps.gpsAvailable) throw new Error ("GPS Not Available")
+			if (! ps.locationServicesEnabled) throw new Error ("Location Services Not Enabled")
+			if (! ps.networkAvailable) throw new Error ("Network Not Available")
+			if (! ps.passiveAvailable) throw new Error ("Passive Not Available")
+			*/
+
+			const location = await Location.getCurrentPositionAsync({})
+			const { latitude, longitude } = location.coords
+
 			this.props.navigation.navigate ('Placer', { 
 				region: {
 					latitude: latitude,

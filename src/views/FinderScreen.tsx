@@ -5,11 +5,6 @@ import {
 	View,
 } from 'react-native'
 
-import {
-	Location,
-	Permissions,
-} from 'expo'
-
 import { NavigationScreenProps } from 'react-navigation'
 import MapView, { 
 	Marker, 
@@ -22,13 +17,15 @@ import {
 	Region, 
 	LatLng, 
 	calcDistance,
-	targetRadius, 
-	getLocationAsync,
+	targetRadius,
 } from '../utils/Maps'
+
+import { Location, Permissions } from 'expo'
+import { EventSubscription } from 'fbemitter'
 
 const styles = StyleSheet.create ({
 	map: {
-		flex: 1,
+		flex: 11,
 	}
 })
 
@@ -46,6 +43,7 @@ interface State {
 }
 
 class FinderScreen extends Component<Props, State> {
+	count:number = 0
 	
 	constructor (props:Props) {
 		super (props)
@@ -59,11 +57,25 @@ class FinderScreen extends Component<Props, State> {
 		}
 	}
 
-	componentWillMount () {
-		getLocationAsync() 
-			.then (currentCoord => this.setState ({ currentCoord }))
-			.catch (error => this.setState ({ error }))
+	componentDidMount () {
+		const options = {
+			enableHighAccuracy: true,
+			timeInterval: 10,
+			distanceInterval: 1,
+		}
+		Location.watchPositionAsync (options, (location) => {
+			try {
+				if (! location.timestamp) throw new Error ("Bad Location")
+				const { latitude, longitude } = location.coords
+				this.setState ({ currentCoord: { latitude, longitude } })
+				this.forceUpdate()
+				this.count++
+			}
+			catch (error) { this.setState ({ error })}
+		})
 	}
+
+	componentWillUnmount () {}
 
 	toArtemp () {
 		this.props.navigation.navigate ('Artemp')
