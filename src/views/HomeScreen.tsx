@@ -4,6 +4,7 @@ import {
 	Text,
 	TouchableHighlight,
 	View,
+	Platform,
 } from 'react-native'
 
 import { Location, Permissions } from 'expo'
@@ -56,13 +57,15 @@ class HomeScreen extends Component<Props, State> {
 				throw new Error ("Location Permission Not Granted")
 			}
 
-			/*
+			
 			const ps = await Location.getProviderStatusAsync()
-			if (! ps.gpsAvailable) throw new Error ("GPS Not Available")
-			if (! ps.locationServicesEnabled) throw new Error ("Location Services Not Enabled")
-			if (! ps.networkAvailable) throw new Error ("Network Not Available")
-			if (! ps.passiveAvailable) throw new Error ("Passive Not Available")
-			*/
+
+			if (Platform.OS == 'android') {
+				if (! ps.gpsAvailable) throw new Error ("GPS Not Available")
+				if (! ps.locationServicesEnabled) throw new Error ("Location Services Not Enabled")
+				if (! ps.networkAvailable) throw new Error ("Network Not Available")
+				if (! ps.passiveAvailable) throw new Error ("Passive Not Available")
+			}
 
 			const location = await Location.getCurrentPositionAsync({})
 			const { latitude, longitude } = location.coords
