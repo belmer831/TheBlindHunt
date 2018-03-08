@@ -7,8 +7,10 @@ import {
 	Platform,
 } from 'react-native'
 
-import { Location, Permissions } from 'expo'
 import { NavigationScreenProps } from 'react-navigation'
+
+import { getCurrentLocation } from '../utils/Location'
+import { LocationPermission, CameraPermission } from '../utils/Permissions'
 
 import ClearButton from '../components/ClearButton'
 import SimpleText from '../components/SimpleText'
@@ -36,7 +38,7 @@ const styles = StyleSheet.create ({
 	},
 })
 
-type Props = NavigationScreenProps<{}>
+type Props = NavigationScreenProps
 
 interface State {
 	error: Error | null,
@@ -50,48 +52,45 @@ class HomeScreen extends Component<Props, State> {
 		}
 	}
 
+	/*
+	async toFinder () {
+		try {
+			if (! LocationPermission.isGranted()) await LocationPermission.request()
+			if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
+
+			const { coords } = await getCurrentLocation ()
+			const target = {
+				latitude: coords.latitude + .000001,
+				longitude: coords.longitude + .000001
+			}
+
+			this.props.navigation.navigate ('Finder', { coords, target })
+		}
+		catch (error) { this.setState ({ error })}
+	}
+	*/
+
 	async toPlacer () {
 		try {
-			let { status } = await Permissions.askAsync('location')
-			if (status !== 'granted') {
-				throw new Error ("Location Permission Not Granted")
-			}
+			if (! LocationPermission.isGranted()) await LocationPermission.request()
+			if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
 
-			
-			const ps = await Location.getProviderStatusAsync()
-
-			if (Platform.OS == 'android') {
-				if (! ps.gpsAvailable) throw new Error ("GPS Not Available")
-				if (! ps.locationServicesEnabled) throw new Error ("Location Services Not Enabled")
-				if (! ps.networkAvailable) throw new Error ("Network Not Available")
-				if (! ps.passiveAvailable) throw new Error ("Passive Not Available")
-			}
-
-			const location = await Location.getCurrentPositionAsync({})
-			const { latitude, longitude } = location.coords
-
-			this.props.navigation.navigate ('Placer', { 
-				region: {
-					latitude: latitude,
-					longitude: longitude,
-					latitudeDelta: delta,
-					longitudeDelta: delta,
-				} 
-			})
+			const { coords } = await getCurrentLocation ()
+			this.props.navigation.navigate ('Placer', { coords })
 		}
-		catch (err) {
-			this.setState ({ 
-				error: err
-			})
-		}
+		catch (error) { this.setState ({ error })}
 	}
 
 	render() {
 		const { error } = this.state
 
+		/*
 		if (error) return (
 			<SimpleText text={error.message}/>
 		)
+		*/
+		if (error) throw error
+
 		else return (
 			<View style={styles.container}>
 				<Text style={styles.title}>

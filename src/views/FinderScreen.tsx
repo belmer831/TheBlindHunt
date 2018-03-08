@@ -3,16 +3,15 @@ import {
 	StyleSheet,
 	Text,
 	View,
+	Dimensions,
 } from 'react-native'
 
 import { NavigationScreenProps } from 'react-navigation'
-import MapView, { 
-	Marker, 
-	MarkerProps,
-	Circle,
-} from 'react-native-maps'
+
+import Svg, { Circle } from 'react-native-svg'
 
 import SimpleText from '../components/SimpleText'
+
 import { 
 	Region, 
 	LatLng, 
@@ -20,130 +19,97 @@ import {
 	targetRadius,
 } from '../utils/Maps'
 
-import { Location, Permissions } from 'expo'
-import { EventSubscription } from 'fbemitter'
+import { coordsToString } from '../utils/Coords'
+import { LocationWatcher } from '../utils/Location'
+
+function coordsToText (coords: LatLng) {
+	const { latitude, longitude } = coords
+	return `(${latitude}, ${longitude})`
+}
 
 const styles = StyleSheet.create ({
-	map: {
-		flex: 11,
+	container: {
+		flex: 10,
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'black',
 	}
 })
 
-type Props = NavigationScreenProps <{
-	region: Region,
-	coord:  LatLng,
-}>
+type Props = NavigationScreenProps | any
 
 interface State {
-	initialRegion: Region,
-	currentRegion: Region,
-	currentCoord:  LatLng,
-	targetCoord:   LatLng,
-	error: Error | null,
+	coords:  LatLng,
+	target:  LatLng,
+	watcher: LocationWatcher,
+	error?:  Error,
 }
 
 class FinderScreen extends Component<Props, State> {
-	count:number = 0
 	
-	constructor (props:Props) {
+	constructor (props: Props) {
 		super (props)
-		const { region, coord } = this.props.navigation.state.params
-		this.state = {
-			initialRegion: region,
-			currentRegion: region,
-			currentCoord:  region,
-			targetCoord:   coord,
-			error: null,
-		}
+		const { coords, target } = this.props.navigation.state.params
+		const watcher = new LocationWatcher ({
+			onSuccess: ({ coords }) => { this.setState ({ coords })},
+			onError:   (error) =>      { this.setState ({ error }) }
+		})
+		this.state = { coords, target, watcher }
 	}
 
 	componentDidMount () {
-		const options = {
-			enableHighAccuracy: true,
-			timeInterval: 10,
-			distanceInterval: 1,
-		}
-		Location.watchPositionAsync (options, (location) => {
-			try {
-				if (! location.timestamp) throw new Error ("Bad Location")
-				const { latitude, longitude } = location.coords
-				this.setState ({ currentCoord: { latitude, longitude } })
-				this.forceUpdate()
-				this.count++
-			}
-			catch (error) { this.setState ({ error })}
-		})
+		this.state.watcher.start()
+			.catch ((error) => this.setState ({ error }))
 	}
 
-	componentWillUnmount () {}
+	componentWillUnmount () {
+		this.state.watcher.end()
+			.catch ((error) => this.setState ({ error }))
+	}
 
 	toArtemp () {
 		this.props.navigation.navigate ('Artemp')
 	}
 
-	updateRegion (region:Region) {
-		this.setState ({
-			currentRegion: region
-		})
-	}
-
 	render () {
 		const {
-			initialRegion,
-			currentRegion,
-			currentCoord,
-			targetCoord,
+			coords,
+			target,
 			error,
 		} = this.state
 
-		if (error) return (
-			<SimpleText text={`Error: ${error.message}`} />
-		)
+		const { height, width } = Dimensions.get ('window')
+		const size = (height < width) ? height : width
 
-		let colors: {
-			pin: string,
-			stroke: string,
-			fill: string,
-		}
-		const nearTarget = calcDistance (currentCoord, targetCoord) <= targetRadius
-		if (nearTarget) {
-			colors = {
-				pin: 'darkgreen',
-				stroke: 'green',
-				fill: 'lightgreen',
-			}
-		}
-		else {
-			colors = {
-				pin: 'maroon',
-				stroke: 'red',
-				fill: 'lightpink',
-			}
-		}
+		if (error) throw error
+		
+		const distance = calcDistance (coords, target)
+		const filler = (distance <= targetRadius) ? 'red' : 'transparent'
+		
+		const currentLine = `Current: ${coordsToString (coords)}`
+		const targetLine  = `Target:  ${coordsToString (target)}`
 
 		return (
-			<MapView style={styles.map} 
-				initialRegion={initialRegion}
-				onRegionChange={(reg:Region) => this.updateRegion(reg)}
-			>
-				<Marker
-					coordinate={targetCoord}
-					pinColor={colors.pin}
-					onPress={() => { if (nearTarget) this.toArtemp() }}
-				/>
-				<Circle
-					center={targetCoord}
-					radius={targetRadius}
-					strokeColor={colors.stroke}
-					fillColor={colors.fill}
-				/>
-				<Circle 
-					center={currentCoord}
-					radius={1}
-					strokeColor={'blue'}
-					fillColor={'blue'}
-				/>
-			</MapView>
+			<View style={{ flex: 1 }}>
+				<SimpleText text={currentLine} />
+				<SimpleText text={targetLine} />
+				<SimpleText text={`${distance}`} />
+				<View style={styles.container}>
+					<Svg height={size} width={size}>
+						
+						<Circle cx='50%' cy='50%' r='44%'
+							stroke='whitesmoke'
+							strokeWidth='4'
+							fill='black'
+						/>
+
+						<Circle cx='50%' cy='50%' r='40%'
+							fill={filler}
+						/>
+
+					</Svg>
+				</View>
+			</View>
 		)
 	}
 }
