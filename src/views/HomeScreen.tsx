@@ -15,8 +15,6 @@ import { LocationPermission, CameraPermission } from '../utils/Permissions'
 import ClearButton from '../components/ClearButton'
 import SimpleText from '../components/SimpleText'
 
-import { delta } from '../utils/Maps'
-
 const styles = StyleSheet.create ({
 	container: {
 		flex: 1,

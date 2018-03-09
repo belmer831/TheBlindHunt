@@ -9,11 +9,8 @@ import {
 import { NavigationScreenProps } from 'react-navigation'
 
 import { Geostamp, LocationWatcher } from '../utils/Location'
-import { Region, LatLng, Point, delta } from '../utils/Maps'
-import {
-	coordsToString,
-	coordsToRegion,
-} from '../utils/Coords'
+import { Region, LatLng, Point } from '../types/Maps'
+import { coordsToString, coordsToRegion } from '../utils/Coords'
 import SimpleText from '../components/SimpleText';
 
 /* NOTE:
@@ -46,7 +43,7 @@ type Props = NavigationScreenProps | any // TODO: Fix this whole situation
 interface State {
 	region:  Region,
 	coords:  LatLng,
-	watcher: LocationWatcher,
+	// watcher: LocationWatcher,
 	error?: Error,
 }
 
@@ -56,13 +53,18 @@ class PlacerScreen extends Component<Props, State> {
 		super (props)
 		const { coords } = this.props.navigation.state.params
 		const region = coordsToRegion (coords)
+		
+		/*
 		const watcher = new LocationWatcher ({
 			onSuccess: ({ coords }) => { this.setState ({ coords }) },
 			onError:   (error) =>      { this.setState ({ error }) }
 		})
-		this.state = { region, coords, watcher }
+		*/
+
+		this.state = { region, coords, /* watcher */ }
 	}
 
+	/*
 	componentDidMount () {
 		try {
 			this.state.watcher.start ()
@@ -76,6 +78,7 @@ class PlacerScreen extends Component<Props, State> {
 		}
 		catch (error) { this.setState ({ error }) }
 	}
+	*/
 	
 	toFinder (target: LatLng) {
 		const { coords } = this.state
@@ -106,7 +109,6 @@ class PlacerScreen extends Component<Props, State> {
 					style={styles.map} 
 					initialRegion={region}
 					onPress={(e:any) => {
-						
 						this.toFinder (e.nativeEvent.coordinate)
 					}}
 				/>

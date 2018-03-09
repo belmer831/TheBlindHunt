@@ -37,7 +37,12 @@ class LocationWatcher {
 		if (this.id) throw new Error ("Location Watcher is already running")
 		this.id = navigator.geolocation.watchPosition (
 			(geo) => this.onSuccess (geo), 
-			(err) => this.onError (new Error (err.message))
+			(err) => this.onError (new Error (err.message)),
+			{
+				enableHighAccuracy: true,
+				timeout: 1000,
+				distanceFilter: 2,
+			}
 		)
 	}
 
