@@ -20,9 +20,9 @@ class LocationWatcher {
 	onError: Callback<Error>
 	private id?: number
 
-	constructor (events:{ 
-		onSuccess:Callback<Geostamp>
-		onError:  Callback<Error>
+	constructor (events: { 
+		onSuccess: Callback<Geostamp>,
+		onError:   Callback<Error>
 	}) {
 		this.onSuccess = events.onSuccess
 		this.onError   = events.onError

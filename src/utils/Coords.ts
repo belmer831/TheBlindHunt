@@ -1,10 +1,10 @@
-import { LatLng } from '../types/Maps'
+import { LatLng } from 'react-native-maps'
 import { DELTA } from '../config'
 
 export function coordsToString (coords: LatLng) {
 	const { latitude, longitude } = coords
-	const latstr =  latitude.toFixed (5)
-	const lonstr = longitude.toFixed (5)
+	const latstr = latitude
+	const lonstr = longitude
 	return `(${latstr}, ${lonstr})`
 }
 
@@ -17,6 +17,33 @@ export function coordsToRegion (coords: LatLng) {
 	}
 }
 
+interface LineBetween {
+	bearing: number,
+	distance: number,
+}
+
+export function lineToString (line:LineBetween) {
+	const { bearing, distance } = line
+	
+	
+	function bearingToString () {
+		if (bearing < 0)   return `${bearing}?`
+
+		if (bearing <= 90) return `${bearing}* NE`
+		if (bearing < 180) return `${-(bearing - 180)}* SE`
+		if (bearing < 270) return `${ (bearing - 180)}* SW`
+		if (bearing < 360) return `${-(bearing - 360)}* NW`
+
+		return `${bearing}?`
+	}
+
+	function distanceToString () {
+		return `${Math.round (distance)}m`
+	}
+
+	return `(${distanceToString()}, ${bearingToString()})`
+}
+
 const EARTH_RADIUS = 6371000
 
 function degreesToRadians (deg: number) {
@@ -27,7 +54,7 @@ function radiansToDegrees (rad: number) {
 	return rad * 180 / Math.PI
 }
 
-export function calcBetween (alpha: LatLng, bravo: LatLng) {
+export function calcBetween (alpha: LatLng, bravo: LatLng): LineBetween {
 	const aLat = degreesToRadians (alpha.latitude)
 	const aLon = degreesToRadians (alpha.longitude)
 	const bLat = degreesToRadians (bravo.latitude)
@@ -42,7 +69,10 @@ export function calcBetween (alpha: LatLng, bravo: LatLng) {
 			(Math.cos (aLat) * Math.sin (bLat)) 
 			- (Math.sin (aLat) * Math.cos (bLat) * Math.cos (dLon))
 		)
-		return radiansToDegrees (Math.atan2 (y, x))
+		let deg = radiansToDegrees (Math.atan2 (y, x))
+		if (deg < 0) deg += 360
+
+		return deg
 	}
 
 	function calcDistance () {

@@ -13,7 +13,7 @@ export const DETECTOR = {
 	SLICES: 6,
 	RINGS: {
 		CENTER: 10,
-		INNER: 20,
+		INNER:  20,
 		MEDIUM: 40,
 		OUTER: 100,
 	},

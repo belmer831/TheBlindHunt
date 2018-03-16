@@ -1,15 +1,7 @@
 import React, { Component } from 'react'
-
-import {
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native'
-
+import { StyleSheet, Text, View } from 'react-native'
 import { NavigationScreenProps } from 'react-navigation'
-
 import { Geostamp, LocationWatcher } from '../utils/Location'
-import { Region, LatLng, Point } from '../types/Maps'
 import { coordsToString, coordsToRegion } from '../utils/Coords'
 import SimpleText from '../components/SimpleText';
 
@@ -21,7 +13,10 @@ import SimpleText from '../components/SimpleText';
 	- This will likely be found again using other parts of the API.
 */
 
-import MapView, { Marker, MarkerProps } from 'react-native-maps'
+import MapView, { 
+	Marker, MarkerProps,
+	Region, LatLng, Point,
+} from 'react-native-maps'
 
 const styles = StyleSheet.create ({
 	header: {
@@ -43,8 +38,7 @@ type Props = NavigationScreenProps | any // TODO: Fix this whole situation
 interface State {
 	region:  Region,
 	coords:  LatLng,
-	// watcher: LocationWatcher,
-	error?: Error,
+	error?:  Error,
 }
 
 class PlacerScreen extends Component<Props, State> {
@@ -53,32 +47,8 @@ class PlacerScreen extends Component<Props, State> {
 		super (props)
 		const { coords } = this.props.navigation.state.params
 		const region = coordsToRegion (coords)
-		
-		/*
-		const watcher = new LocationWatcher ({
-			onSuccess: ({ coords }) => { this.setState ({ coords }) },
-			onError:   (error) =>      { this.setState ({ error }) }
-		})
-		*/
-
-		this.state = { region, coords, /* watcher */ }
+		this.state = { region, coords }
 	}
-
-	/*
-	componentDidMount () {
-		try {
-			this.state.watcher.start ()
-		}
-		catch (error) { this.setState ({ error }) }
-	}
-
-	componentWillMount () {
-		try {
-			this.state.watcher.end ()
-		}
-		catch (error) { this.setState ({ error }) }
-	}
-	*/
 	
 	toFinder (target: LatLng) {
 		const { coords } = this.state
@@ -91,12 +61,6 @@ class PlacerScreen extends Component<Props, State> {
 			coords,
 			error,
 		} = this.state
-
-		/*
-		if (error) return (
-			<SimpleText text={`Error: ${error.message}`} />
-		)
-		*/
 
 		if (error) throw error
 

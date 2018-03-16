@@ -1,0 +1,6 @@
+export const ReactLogo = require ('../../assets/react-logo.png')
+export const UsernameIcon = require ('../../assets/username-icon.png')
+export const PasswordIcon = require ('../../assets/password-icon.png')
+export const BlurpleWallpaper = require ('../../assets/blurple-wallpaper.png')
+export const Spinner = require ('../../assets/spinner.gif')
+export const Splash = require ('../../assets/darkroom-splash.png')
