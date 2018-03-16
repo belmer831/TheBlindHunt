@@ -1,4 +1,4 @@
-package com.theblindhunt;
+package com.theblindhunt.app;
 
 import com.facebook.react.ReactActivity;
 

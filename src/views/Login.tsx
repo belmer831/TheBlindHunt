@@ -115,7 +115,7 @@ export default class Login extends Component<Props, State> {
 		const cred = Firebase.auth.GoogleAuthProvider.credential (data.idToken, data.accessToken)
 
 		await Firebase.auth().signInWithCredential (cred)
-		this.setState ({ message: "You should be logged in" })
+		this.setState ({ message: "You should've been redirected" })
 	}
 
 	onPressGoogle () {

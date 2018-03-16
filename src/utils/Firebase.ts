@@ -15,8 +15,8 @@ import { LatLng } from 'react-native-maps'
 interface Callback<T> { (param: T): void }
 
 export interface GameItems {
-	items: string[],
-	coins: number,
+	Coins: number,
+	[key:string]: number,
 }
 
 class InventoryWatcher {
@@ -147,21 +147,47 @@ export async function openChest (chestId: string) {
 	)
 }
 
+export function watchInventory (callback: Callback<GameItems>) {
+	return getUserData ('Inventory').on ('value', (snapshot) => {
+		if (snapshot.exists ()) {
+			let items:GameItems = {
+				Coins: 0
+			}
+
+			const coinSnap = snapshot.child ('Coins')
+			if (coinSnap.exists()) items.Coins = coinSnap.val()
+
+			getEntries (snapshot.child ('Items')).forEach (entry => {
+				try {
+					const name = entry.val.Item.Name as string
+					const count = entry.val.Count as number
+					items[name] = count
+				}
+				catch {}
+			})
+
+			callback (items)
+		}
+	})
+}
+
 // TODO
 export function watchChestContents (callback: Callback<GameItems>) {
 	return getUserData ('ChestContent').on ('value', (snapshot) => {
 		if (snapshot.exists ()) {
-			const coins = snapshot.child ('EnergyCrystals').val()
-			const items = getEntries (snapshot.child ('ItemNames'))
-				.map (entry => {
-					// TODO
-					try {
-						return entry.key
-					}
-					catch { return null }
-				})
-				.filter (exists) as string[]
-			callback ({ coins, items })
+			let items:GameItems = {
+				Coins: 0,
+			}
+
+			items.Coins = snapshot.child ('Coins').val() as number
+			getEntries (snapshot.child ('ItemNames')).forEach (entry => {
+				try {
+					const name = entry.val
+					items[name] += 1
+				}
+				catch {}
+			})
+			callback (items)
 		}
 	})
 }
@@ -190,50 +216,3 @@ export function watchClosestChests (callback: Callback<LatLng[]>) {
 		}
 	})
 }
-
-/* NOTES:
-	Problem:
-		- How to access the Cloud Functions inside the mobile app.
-
-	Technologies:
-		- Preferably uses react-native-firebase.
-		- Pure JS firebase packages are fine.
-		- HTTPS requests as a last resort.
-	
-	Max's Solution:
-		- Uses native Java in Android Studio
-		- It doesn't actually seem like he uses these Cloud Functions.
-			- Maybe they were created FROM his code.
-			- Maybe the cloud functions just aren't important
-			- Maybe the cloud functions aren't to be consumed but are for admin stuff.
-		- GetUserData Snippet:
-			private DatabaseReference GetUserData (String child) {
-				DatabaseReference ref = this.database.child ("UserData")
-					.child ( FirebaseAuth
-						.getInstance()
-						.getCurrentUser()
-						.getUid()
-					);
-				return (child == null) ? ref : ref.child (child)
-			}
-		- Listener Snippet:
-			private void ${MethodName}() {
-				GetUserData("${PropName}").addValueEventListener( new ValueEventListener() {
-					@Override
-					public void onDataChange (DataSnapshot snap) {
-						if (snap.exists()) {
-							// Display 
-						}
-						else {
-							// Display Error Message
-						}
-					}
-
-					@Override
-					public void onCancelled (DatabaseError dberr) {
-						// Log
-					}
-				})
-			}
-*/
-

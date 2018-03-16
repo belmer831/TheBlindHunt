@@ -8,7 +8,7 @@
 		"build": "tsc",
 		"bundle": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
 		"android": "yarn run build && yarn run force-android",
-		"force-android": "yarn run bundle && react-native run-android",
+		"force-android": "yarn run clean-android && yarn run bundle && react-native run-android",
 		"clean-android": "cd android && ./gradlew clean && cd .."
 	},
 	"dependencies": {

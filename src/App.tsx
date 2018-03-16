@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
+import { StyleSheet } from 'react-native'
 
-// NOTE: Roundabout way to override type of Scene
+// NOTE: Workaround for bad types
 import * as RNRF from 'react-native-router-flux'
 const Router:any = RNRF.Router
-const Scene:any =  RNRF.Scene
-const Stack:any =  RNRF.Scene
+const Scene:any  = RNRF.Scene
+const Stack:any  = RNRF.Stack
+const Tabs:any   = RNRF.Tabs
 
 import { GoogleSignin } from 'react-native-google-signin'
 import Firebase from 'react-native-firebase'
@@ -16,10 +18,19 @@ import {
 	setupUserChests, 
 } from './utils/Firebase'
 
-import Loading  from './views/Loading'
-import Login    from './views/Login'
-import Detector from './views/Detector'
-import Scanner  from './views/Scanner'
+import { GOOGLE_SIGNIN_WEB_CLIENT_ID } from './config'
+
+import Loading   from './views/Loading'
+import Login     from './views/Login'
+import Detector  from './views/Detector'
+import Inventory from './views/Inventory'
+import Scanner   from './views/Scanner'
+
+const styles = StyleSheet.create ({
+	tabbar: {
+
+	},
+})
 
 interface Props {}
 interface State {
@@ -41,7 +52,7 @@ export default class App extends Component<Props, State> {
 	async onStart () {
 		await GoogleSignin.hasPlayServices ({ autoResolve: true })
 		await GoogleSignin.configure ({
-			webClientId: "471839243508-hdrmdajhps25j4rhtr9jurt3fng29bja.apps.googleusercontent.com",
+			webClientId: GOOGLE_SIGNIN_WEB_CLIENT_ID,
 		})
 
 		if (! LocationPermission.isGranted()) await LocationPermission.request()
@@ -89,13 +100,38 @@ export default class App extends Component<Props, State> {
 		return (
 			<Router>
 				<Scene key='root'>
-					<Stack key='Auth' initial={(! user)}>
-						<Scene key='Login' title='Login' component={Login} /> 
+					<Stack key='Auth' 
+						initial={(! user)}
+					>
+						<Scene key='Login' 
+							title='Login' 
+							component={Login} 
+						/> 
 					</Stack>
 
-					<Stack key='Main' initial={(user)}>
-						<Scene key='Detector' title='Detector' component={Detector} initial/>
-						<Scene key='Scanner' title='Scanner' component={Scanner} />
+					<Stack key='Main' 
+						initial={(user)}
+					>
+						<Tabs
+							key='Wander'
+							swipeEnabled
+							showLabel
+							tabBarStyle={styles.tabbar}
+						>
+							<Scene key='Detector' 
+								title='Detector' 
+								component={Detector} 
+								initial 
+							/>
+							<Scene key='Inventory'
+								title='Inventory'
+								component={Inventory}
+							/>
+						</Tabs>
+						<Scene key='Scanner' 
+							title='Scanner' 
+							component={Scanner} 
+						/>
 					</Stack>
 				</Scene>
 			</Router>
