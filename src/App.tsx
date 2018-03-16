@@ -41,7 +41,7 @@ export default class App extends Component<Props, State> {
 	async onStart () {
 		await GoogleSignin.hasPlayServices ({ autoResolve: true })
 		await GoogleSignin.configure ({
-			webClientId: '471839243508-e4adts7gkiil76niaeceuos1s9tqdegd.apps.googleusercontent.com',
+			webClientId: "471839243508-hdrmdajhps25j4rhtr9jurt3fng29bja.apps.googleusercontent.com",
 		})
 
 		if (! LocationPermission.isGranted()) await LocationPermission.request()
