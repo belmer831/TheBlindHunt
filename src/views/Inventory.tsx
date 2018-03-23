@@ -9,8 +9,10 @@ import {
 
 import {
 	GameItems,
+	setupInventory,
 	watchInventory,
 } from '../utils/Firebase'
+import ItemCounts from '../components/ItemCounts'
 import SimpleText from '../components/SimpleText';
 
 const itemNames = [
@@ -32,7 +34,8 @@ interface Props {
 
 }
 interface State {
-	items?: GameItems
+	items?: GameItems,
+	error?: Error,
 }
 
 export default class Inventory extends Component<Props, State> {
@@ -47,7 +50,12 @@ export default class Inventory extends Component<Props, State> {
 	}
 
 	render () {
-		const { items } = this.state
+		const { 
+			items,
+			error,
+		} = this.state
+
+		if (error) throw error
 
 		if (! items) return (
 			<SimpleText text={'Missing Items'} />
@@ -60,11 +68,7 @@ export default class Inventory extends Component<Props, State> {
 		})
 
 		return (
-			<View style={styles.container}>
-				{ allItems.map (item => (
-					<SimpleText text={`${item.name}: ${item.count}`} />
-				))}
-			</View>
+			<ItemCounts style={styles.container} items={items}/>
 		)
 	}
 }

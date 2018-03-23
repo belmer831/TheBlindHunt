@@ -2,86 +2,46 @@ import RNFirebase, {
 	RNFirebase as RNFirebaseStatic 
 } from 'react-native-firebase'
 
-export type User           = RNFirebaseStatic.User
+export type User = RNFirebaseStatic.User
 export type UserCredential = RNFirebaseStatic.UserCredential
-export type UserInfo       = RNFirebaseStatic.UserInfo
-export type UserMetadata   = RNFirebaseStatic.UserMetadata
-export type AuthProvider   = RNFirebaseStatic.auth.AuthProvider
-export type AuthResult     = RNFirebaseStatic.auth.AuthResult
-export type DataSnapshot   = RNFirebaseStatic.database.DataSnapshot
+export type UserInfo = RNFirebaseStatic.UserInfo
+export type UserMetadata = RNFirebaseStatic.UserMetadata
+export type AuthProvider = RNFirebaseStatic.auth.AuthProvider
+export type AuthResult = RNFirebaseStatic.auth.AuthResult
+export type DataSnapshot = RNFirebaseStatic.database.DataSnapshot
+export type Reference = RNFirebaseStatic.database.Reference
 
 import { LatLng } from 'react-native-maps'
 
 interface Callback<T> { (param: T): void }
+interface Events<T> {
+	onSuccess: Callback<T>
+	onError:   Callback<Error>
+}
 
 export interface GameItems {
 	Coins: number,
 	[key:string]: number,
 }
 
-class InventoryWatcher {
-	// TODO
+export interface ChestContent {
+	id: string,
+	items: GameItems,
 }
 
-/* Chests Watcher
- - Gets the user's ten closest chests
-
-export default class ChestsWatcher {
-
-	onSuccess: Callback<Chest[]>
-	onError:   Callback<Error>
-
-	constructor (events: {
-		onSuccess: Callback<Chest[]>
-		onError:   Callback<Error>
-	}) {
-		this.onSuccess = events.onSuccess
-		this.onError   = events.onError
-
-		// I need the same function pointer when turning on and off the callback.
-		this.onResponse = this.onResponse.bind (this)
-	}
-
-	private onResponse (snap: DataSnapshot) {
-		
-	}
-
-	isRunning () {
-		
-	}
-
-	start () {
-
-	}
-
-	end () {
-
-	}
+export interface ChestData extends LatLng {
+	chestId: string,
 }
-*/
 
-function exists (thing:any) {
-	return (! (! thing))
-}
-/*
-function snapshotToList (snapshot: DataSnapshot) {
-	let list:any[] = []
-
-	snapshot.forEach (child => {
-		if (child) list.push (child)
-		return exists (child)
-	})
-
-	return ( list
-		.map (child => child.val())
-		.filter (child => exists (child))
-	)
-}
-*/
 interface Entry<T> {
 	key: string,
 	val: T,
 }
+
+function exists (thing:any) {
+	return (! (! thing))
+}
+
 function getEntries (snapshot: DataSnapshot): Entry<any>[] {
 	const values:{[key:string]:any} = snapshot.val()
 	return Object.keys (values).map (key => ({
@@ -106,6 +66,7 @@ function getUserData (child?: string) {
 	return data
 }
 
+/* NOTE: Probably unnecessary
 export async function ensureRegistration () {
 	const currentUser = getCurrentUser()
 	const userRef = RNFirebase.database().ref()
@@ -120,9 +81,9 @@ export async function ensureRegistration () {
 		})
 	}
 }
+*/
 
-// TODO: Refractor all this code
-
+/* NOTE: Probably unnecessary
 export async function setupUserChests () {
 	const snapshot = await getUserData ('Chests').once ('value')
 	if (! snapshot.exists ()) {
@@ -130,56 +91,99 @@ export async function setupUserChests () {
 		getUserData ('Location').remove()
 	}
 }
+*/
 
 export async function updateLocation (coords:LatLng) {
-	return ( getUserData ('Location').set ({
+	return getUserData ('Location').set ({
 		Latitude: coords.latitude,
 		Longitude: coords.longitude,
-	}))
-}
-
-export async function openChest (chestId: string) {
-	return ( getUserData ('Chests')
-		.child (chestId)
-		.child ('Properties')
-		.child ('WasOpened')
-		.set (true)
-	)
-}
-
-export function watchInventory (callback: Callback<GameItems>) {
-	return getUserData ('Inventory').on ('value', (snapshot) => {
-		if (snapshot.exists ()) {
-			let items:GameItems = {
-				Coins: 0
-			}
-
-			const coinSnap = snapshot.child ('Coins')
-			if (coinSnap.exists()) items.Coins = coinSnap.val()
-
-			getEntries (snapshot.child ('Items')).forEach (entry => {
-				try {
-					const name = entry.val.Item.Name as string
-					const count = entry.val.Count as number
-					items[name] = count
-				}
-				catch {}
-			})
-
-			callback (items)
-		}
 	})
 }
 
-// TODO
-export function watchChestContents (callback: Callback<GameItems>) {
-	return getUserData ('ChestContent').on ('value', (snapshot) => {
-		if (snapshot.exists ()) {
-			let items:GameItems = {
+export async function openChest (chestId: string): Promise<void> {
+	const wasOpenedRef = getUserData ('Chests')
+		.child (chestId)
+		.child ('Properties')
+		.child ('WasOpened')
+	
+	return wasOpenedRef.set (true)
+}
+
+abstract class FirebaseWatcher<T> {
+	onSuccess: Callback<T>
+	onError:   Callback<Error>
+
+	constructor (events: {
+		onSuccess: Callback<T>
+		onError:   Callback<Error>
+	}) {
+		this.onSuccess = events.onSuccess
+		this.onError   = events.onError
+
+		this.onChange = this.onChange.bind (this)
+	}
+
+	abstract onChange (snapshot:DataSnapshot): void
+	abstract ref (): Reference
+
+	async start () {
+		this.ref().on ('value', this.onChange, (err) => this.onError(err))
+	}
+
+	async end () {
+		this.ref().on ('value', this.onChange, (err) => this.onError(err))
+	}
+}
+
+export class InventoryWatcher extends FirebaseWatcher<GameItems> {
+	ref () {
+		return RNFirebase.database().ref().child ('ChestContent')
+	}
+
+	onChange (snapshot: DataSnapshot) {
+		try {
+			let items: GameItems = {
+				Coins: 0
+			}
+			
+			if (snapshot.exists ()) {
+				const coinSnap = snapshot.child ('Coins')
+				if (coinSnap.exists()) items.Coins = coinSnap.val()
+	
+				getEntries (snapshot.child ('Items')).forEach (entry => {
+					try {
+						const name = entry.val.Item.Name as string
+						const count = entry.val.Count as number
+						items[name] = count
+					}
+					catch {}
+				})
+			}
+			
+			this.onSuccess (items)
+		}
+		catch (error) {
+			this.onError (error)
+		}
+	}
+}
+
+export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
+	ref () {
+		return getUserData ('ChestContent')
+	}
+
+	onChange (snapshot: DataSnapshot) {
+		try {
+			if (! snapshot.exists()) throw new Error ("No Snapshot")
+
+			let items: GameItems = {
 				Coins: 0,
 			}
 
+			const id = snapshot.child ('ChestID').val() as string
 			items.Coins = snapshot.child ('Coins').val() as number
+
 			getEntries (snapshot.child ('ItemNames')).forEach (entry => {
 				try {
 					const name = entry.val
@@ -187,32 +191,42 @@ export function watchChestContents (callback: Callback<GameItems>) {
 				}
 				catch {}
 			})
-			callback (items)
+
+			this.onSuccess ({ id, items })
 		}
-	})
+		catch (error) {
+			this.onError (error)
+		}
+	}
 }
 
-// TODO: Use closest chests and use child_added/child_removed
-export function watchClosestChests (callback: Callback<LatLng[]>) {
-	return getUserData ('Chests').on ('value', (snapshot) => {
-		if (snapshot.exists ()) {
-			console.log (`Number of Chests Received: ${snapshot.numChildren()}`)
+export class ChestDataWatcher extends FirebaseWatcher<ChestData[]> {
+	ref () {
+		return getUserData ('Chests')
+	}
 
+	onChange (snapshot: DataSnapshot) {
+		try {
+			if (! snapshot.exists ()) throw new Error ("No Snapshot")
+	
 			const chests = getEntries (snapshot)
 				.map (entry => {
 					try {
 						const { Latitude, Longitude } = entry.val
 						return {
-							key: entry.key,
+							chestId: entry.key,
 							latitude: Latitude,
 							longitude: Longitude,
 						}
 					}
 					catch { return null }
 				})
-				.filter (exists) as LatLng[]
-
-			callback (chests)
+				.filter (exists) as ChestData[]
+	
+			this.onSuccess (chests)
 		}
-	})
+		catch (error) {
+			this.onError (error)
+		}
+	}
 }

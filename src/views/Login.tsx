@@ -22,10 +22,10 @@ import UserInput from '../components/UserInput'
 import SubmitButton from '../components/SubmitButton'
 
 import {
-	ReactLogo,
-	UsernameIcon,
-	PasswordIcon,
-	BlurpleWallpaper,
+	REACT_LOGO,
+	USERNAME_ICON,
+	PASSWORD_ICON,
+	BLURPLE_WALLPAPER,
 } from '../config/Assets'
 
 const WINDOW_WIDTH = Dimensions.get('window').width
@@ -134,11 +134,14 @@ export default class Login extends Component<Props, State> {
 		if (error) throw error
 
 		return (
-			<ImageBackground source={BlurpleWallpaper} style={styles.background}>
+			<ImageBackground 
+				source={BLURPLE_WALLPAPER} 
+				style={styles.background}
+			>
 				<View style={styles.container}>
 
 					<View style={styles.brandContainer}>
-						<Image source={ReactLogo} style={styles.brandImage} />
+						<Image source={REACT_LOGO} style={styles.brandImage} />
 						<Text style={styles.brandText}> 
 							The Blind Hunt 
 						</Text>
@@ -157,14 +160,14 @@ export default class Login extends Component<Props, State> {
 						>
 						<UserInput 
 							placeholder={'Username'}
-							logo={UsernameIcon} 
+							logo={USERNAME_ICON} 
 							onChangeText={(text) => this.setState ({
 								username: text 
 							})}
 							/>
 						<UserInput 
 							placeholder={'Password'}
-							logo={PasswordIcon}
+							logo={PASSWORD_ICON}
 							secure
 							onChangeText={(text) => this.setState ({
 								password: text

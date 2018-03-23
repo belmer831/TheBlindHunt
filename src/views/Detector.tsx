@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {
+	TouchableHighlight,
 	StyleSheet,
 	Text,
 	View,
@@ -8,24 +9,21 @@ import {
 	Animated,
 } from 'react-native'
 
+import { Actions } from 'react-native-router-flux'
 import Compass from 'react-native-simple-compass'
-import { NavigationScreenProps } from 'react-navigation'
-import Svg, { Circle } from 'react-native-svg'
 import { Region, LatLng } from 'react-native-maps'
 
+import { PIESLICES } from '../config/Assets'
 import CompositeImage, { ImageSourceStyle } from '../components/CompositeImage'
 import SimpleText from '../components/SimpleText'
-import { DETECTOR, PIESLICE } from '../config'
-import { 
-	coordsToString, 
-	calcBetween,
-	lineToString,
-} from '../utils/Coords'
+import ClearButton from '../components/ClearButton'
+import { calcBetween } from '../utils/Coords'
 import { LocationWatcher } from '../utils/Location'
-
+import { ZoneData, findZone } from '../utils/Zones'
 import { 
 	updateLocation,
-	watchClosestChests,
+	ChestDataWatcher,
+	ChestData,
 } from '../utils/Firebase'
 
 const THIN_RED = 'rgba(243,53,6,0.5)'
@@ -40,10 +38,16 @@ const styles = StyleSheet.create ({
 		justifyContent: 'center',
 		backgroundColor: 'black',
 	},
+	middle: {
+		flex: 6,
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'transparent',
+	},
 	overlay: {
 		position: 'absolute',
-		top: vertpad,
-		bottom: vertpad,
+		top: 0,
+		bottom: 0,
 		left: 0,
 		right: 0,
 	},
@@ -54,84 +58,29 @@ const styles = StyleSheet.create ({
 		height: width,
 		resizeMode: 'contain',
 	},
+	bottom: {
+		position: 'absolute',
+		top: vertpad + width,
+		bottom: 0,
+		left: 0,
+		right: 0,
+	},
 })
 
-type Props = NavigationScreenProps | any
+interface ProChest extends ChestData {
+	bearing: number,
+	distance: number,
+	zone: ZoneData,
+}
 
+interface Props {}
 interface State {
 	coords?: LatLng,
+	chests?: ChestData[],
 	facing: number,
-	chests?: LatLng[],
-	watcher: LocationWatcher,
-	error?:  Error,
-}
-
-function exists (thing:any) {
-	return (! (! thing))
-}
-
-/*
-const MidRadarCircleSvg = (props:{ distance:number }) => {
-	
-	const { height, width } = Dimensions.get ('window')
-	const size = (height < width) ? height : width
-
-	const filler = (distance <= 10) ? 'red' : 'transparent'
-	const currLine = `Current: ${CoordsConverter.toString (coords)}`
-	const targLine =  `Target: ${CoordsConverter.toString (target)}`
-
-	return (
-		<View style={{ flex: 1 }}>
-			<SimpleText text={currLine} />
-			<SimpleText text={targLine} />
-			<SimpleText text={`${distance}`} />
-			<View style={flex: 9}>
-				<Svg height={size} width={size}>			
-					<Circle cx='50%' cy='50%' r='44%'
-						stroke='whitesmoke'
-						strokeWidth='4'
-						fill='black'
-					/>
-					<Circle cx='50%' cy='50%' r='40%'
-						fill={filler}
-					/>
-				</Svg>
-			</View>
-		</View>
-		
-	)
-}
-*/
-
-function findZone (bearing: number, distance: number, facing: number) {
-	if (distance > DETECTOR.RINGS.OUTER) return null
-
-	function findImg () {
-		if (distance <= DETECTOR.RINGS.CENTER) return PIESLICE.CENTER
-		if (distance <= DETECTOR.RINGS.INNER)  return PIESLICE.SMALL
-		if (distance <= DETECTOR.RINGS.MEDIUM) return PIESLICE.MEDIUM
-		if (distance <= DETECTOR.RINGS.OUTER)  return PIESLICE.LARGE
-
-		throw new Error ("BUG ALERT: findImg() should have return a value")
-	}
-
-	function findRota () {
-		const rota = 60 * Math.floor (bearing / 60)
-		return rota - facing // TODO
-	}
-
-	return {
-		source: findImg(),
-		style: {
-			tintColor: THIN_RED,
-			transform: [{ rotateZ: `${findRota()}deg` }],
-		}
-	}
-}
-
-interface ZoneImageProps {
-	coords?: LatLng,
-	target?: LatLng,
+	chestsWatcher: ChestDataWatcher,
+	locationWatcher: LocationWatcher,
+	error?: Error,
 }
 
 export default class Detector extends Component<Props, State> {
@@ -139,34 +88,42 @@ export default class Detector extends Component<Props, State> {
 	constructor (props: Props) {
 		super (props)
 
-		const watcher = new LocationWatcher ({
+		const locationWatcher = new LocationWatcher ({
 			onSuccess: ({ coords }) => { 
 				this.setState ({ coords })
 
 				updateLocation (coords)
-					.catch (error => { this.setState ({ error })})
+					.catch (error => this.setState ({ error }))
 			},
-			onError: (error) => { this.setState ({ error }) }
+			onError: (error) => this.setState ({ error })
 		})
 
-		this.state = { watcher, facing: 0 }
+		const chestsWatcher = new ChestDataWatcher ({
+			onSuccess: (chests) => this.setState ({ chests }),
+			onError: (error) => this.setState ({ error })
+		})
+
+		this.state = { 
+			facing: 0,
+			locationWatcher,
+			chestsWatcher,
+		}
 	}
 
 	componentDidMount () {
-		this.state.watcher.start()
-			.catch (error => this.setState ({ error }))
-		// TODO: Set callback for closest chests
-		watchClosestChests (chests => this.setState ({ chests }))
+		this.state.locationWatcher.start()
+		this.state.chestsWatcher.start()
 		Compass.start (3, (facing) => this.setState ({ facing }))
 	}
 
 	componentWillUnmount () {
-		this.state.watcher.end()
-			.catch (error => this.setState ({ error }))
+		this.state.locationWatcher.end()
+		this.state.chestsWatcher.end()
+		Compass.stop()
 	}
 
-	toScanner () {
-		this.props.navigation.navigate ('Scanner')
+	toScanner (chestId?: string) {
+		if (chestId) Actions.Scanner ({ chestId })
 	}
 
 	render () {
@@ -177,7 +134,9 @@ export default class Detector extends Component<Props, State> {
 			error,
 		} = this.state
 
-		// if (error) throw error
+		/* TODO: Handle Errors in Detector
+		if (error) throw error
+		*/
 
 		if ((! chests) || (chests.length === undefined)) return (
 			<SimpleText text={"Missing Chests"} />
@@ -186,40 +145,55 @@ export default class Detector extends Component<Props, State> {
 		if (! coords) return (
 			<SimpleText text={"Missing Coords"} />
 		)
-
-		let images = [{
-			source: PIESLICE.COMPLETE,
-			style: {
-				transform: [{ rotateZ: `${-facing}deg` }]
-			}
-		}]
-
-		// TODO: Remove Duplicates	
-		const strs = chests
-			.map (chest => {
-				const { latitude, longitude } = chest
-				const { bearing, distance } = calcBetween (coords, chest)
-				return { latitude, longitude, bearing, distance }
-			})
-			.map (chest => `{${coordsToString (chest)}, ${lineToString (chest)}}`)
-			.map (str => `\n\t${str}`)
-		console.log (`Chests: [ ${strs}\n]`)
-
-		const zones = chests
-			.map (chest => calcBetween (coords, chest))
-			.map (line  => findZone (line.bearing, line.distance, facing))
-			.filter (zone => (zone !== null)) // NOTE: Why doesn't this work?
-			.forEach (zone => { if (zone !== null) images.push (zone) })
 		
-		console.log (`Heading: ${facing}`)
+		let centerChestId: string | undefined
+
+		const proChests = chests
+			.map (chest => {
+				const { bearing, distance } = calcBetween (coords, chest)
+				const zone = findZone (bearing, distance)
+				return { bearing, distance, zone, ...chest }
+			})
+			.filter (proChest => (proChest.zone !== null)) as ProChest[]
+
+		proChests.forEach (chest => {
+			const { zone, chestId } = chest
+			if (zone.source === PIESLICES.CENTER) {
+				centerChestId = chestId
+			}
+		})
+		
+		const zones:ImageSourceStyle[] = proChests.map (chest => {
+			const { source, rotation } = chest.zone
+			const style = {
+				tintColor: THIN_RED,
+				transform: [{ rotateZ: `${(rotation - facing)}deg` }]
+			}
+			return { source, style }
+		})
+		
+		zones.unshift ({
+			source: PIESLICES.COMPLETE,
+			style: { transform: [{ rotateZ: `${-facing}deg` }]}
+		})
 		
 		return (
-			<CompositeImage 
-				style={styles.container}
-				wrapperStyle={styles.overlay}
-				imageStyle={styles.pieslice}
-				images={images}
+			<View style={{ flex: 1, backgroundColor: 'black' }}>
+				<CompositeImage 
+					style={styles.middle}
+					wrapperStyle={styles.overlay}
+					imageStyle={styles.pieslice}
+					images={zones}
 				/>
+				<View style={{ flex: 1 }}>
+					{ (centerChestId) ? (
+						<ClearButton
+							text={'Scan'}
+							onPress={() => this.toScanner (centerChestId)}
+						/>
+					): undefined }
+				</View>
+			</View>
 		)
 	}
 }

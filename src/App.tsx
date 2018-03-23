@@ -12,11 +12,7 @@ import { GoogleSignin } from 'react-native-google-signin'
 import Firebase from 'react-native-firebase'
 
 import { LocationPermission } from './utils/Permissions'
-import { 
-	User,
-	ensureRegistration,
-	setupUserChests, 
-} from './utils/Firebase'
+import { User } from './utils/Firebase'
 
 import { GOOGLE_SIGNIN_WEB_CLIENT_ID } from './config'
 
@@ -28,7 +24,7 @@ import Scanner   from './views/Scanner'
 
 const styles = StyleSheet.create ({
 	tabbar: {
-
+		backgroundColor: 'whitesmoke',
 	},
 })
 
@@ -70,9 +66,12 @@ export default class App extends Component<Props, State> {
 
 	componentDidMount () {
 		const listener = Firebase.auth().onAuthStateChanged ((user?: User) => {
+			this.setState ({ user })
+			/*
 			this.onAuthStateChanged (user)
 				.then (() => this.setState ({ user }))
 				.catch (error => this.setState ({ error }))
+			*/
 		})
 		this.setState ({ listener })
 		
