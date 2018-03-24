@@ -8,7 +8,6 @@ import {
 	TouchableHighlight,
 	KeyboardAvoidingView,
 	ImageBackground,
-	ImageBackgroundProperties
 } from 'react-native'
 
 import Firebase from 'react-native-firebase'
