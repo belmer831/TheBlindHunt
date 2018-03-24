@@ -11,7 +11,7 @@ import {
 	View,
 } from 'react-native'
 
-import { Spinner } from '../config/Assets'
+import { SPINNER } from '../config/Assets'
 
 const WINDOW_WIDTH  = Dimensions.get ('window').width
 const WINDOW_HEIHGT = Dimensions.get ('window').height
@@ -127,7 +127,7 @@ export default class LoaderButton extends Component<Props, State> {
 					activeOpacity={1}
 					>
 					{ this.state.loading ?
-						<Image source={Spinner} style={styles.image}/>
+						<Image source={SPINNER} style={styles.image}/>
 						:
 						<Text style={styles.text}> Submit </Text>
 					}

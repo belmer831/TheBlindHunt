@@ -38,14 +38,18 @@ export default class Scanner extends Component<Props, State> {
 		this.state = { contentWatcher }
 	}
 
+	async onMount () {
+		await openChest (this.props.chestId)
+		await this.state.contentWatcher.start()
+	}
+
 	componentDidMount () {
-		this.state.contentWatcher.start()
-		openChest (this.props.chestId)
+		this.onMount ()
 			.catch (error => this.setState ({ error }))
 	}
 
 	componentWillUnmount () {
-		this.state.contentWatcher.end()
+		this.state.contentWatcher.end ()
 	}
 
 	render () {
@@ -54,15 +58,17 @@ export default class Scanner extends Component<Props, State> {
 			error,
 		} = this.state
 
+		if (error) throw error
+
 		if (! content) return (
 			<SimpleText text={'Chest Unopened'} />
 		)
 
-		if (error) throw error
+		const message = `Chest ${(content) ? 'Opened' : 'Unopened'}`
 
 		return (
 			<View style={styles.container}>
-				<SimpleText text={'Chest Opened!'} />
+				<SimpleText text={message} />
 				<ItemCounts style={{ flex: 6 }} items={content.items} />
 			</View>
 		)

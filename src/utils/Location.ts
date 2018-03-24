@@ -16,8 +16,8 @@ async function getCurrentLocation () {
 }
 
 class LocationWatcher {
-	onSuccess:Callback<Geostamp>
-	onError: Callback<Error>
+	onSuccess: Callback<Geostamp>
+	onError:   Callback<Error>
 	private id?: number
 
 	constructor (events: { 

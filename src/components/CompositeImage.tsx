@@ -37,14 +37,16 @@ interface Props {
 export default class CompositeImage extends Component<Props> {
 	
 	render () {
+		let count = 0
 		return (
 			<View style={this.props.style}>
 				{ this.props.images.map (image => (
-					<View style={this.props.wrapperStyle}>
-						<Image 
+					<View key={`img_${++count}`}
+						style={this.props.wrapperStyle}>
+						<Image
 							style={[this.props.imageStyle, image.style]}
 							source={image.source}
-							/>
+						/>
 					</View>
 				))}
 			</View>

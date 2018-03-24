@@ -8,7 +8,7 @@ import {
 	ImageBackground
 } from 'react-native'
 
-import { Splash } from '../config/Assets'
+import { DARKROOM_SPLASH } from '../config/Assets'
 
 const styles = StyleSheet.create ({
 	container: { 
@@ -16,22 +16,21 @@ const styles = StyleSheet.create ({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	background: {
-		flex: 1,
-		resizeMode: 'cover',
-	},
 })
 
 interface Props {}
 interface State {}
 
 export default class Loading extends PureComponent {
-
 	render () {
 		return (
-			<ImageBackground source={Splash} style={styles.background}>
+			<ImageBackground 
+				source={DARKROOM_SPLASH} 
+				style={{ flex: 1 }}
+				resizeMode='cover'
+			>
 				<View style={styles.container}>
-					<ActivityIndicator animating={true} />
+					<ActivityIndicator animating />
 				</View>
 			</ImageBackground>
 		)

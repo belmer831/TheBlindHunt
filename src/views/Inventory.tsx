@@ -9,8 +9,7 @@ import {
 
 import {
 	GameItems,
-	setupInventory,
-	watchInventory,
+	InventoryWatcher,
 } from '../utils/Firebase'
 import ItemCounts from '../components/ItemCounts'
 import SimpleText from '../components/SimpleText';
@@ -30,23 +29,29 @@ const styles = StyleSheet.create ({
 	},
 })
 
-interface Props {
-
-}
+interface Props {}
 interface State {
+	itemsWatcher: InventoryWatcher,
 	items?: GameItems,
 	error?: Error,
 }
 
 export default class Inventory extends Component<Props, State> {
-
 	constructor (props: Props) {
 		super (props)
-		this.state = {}
+		const itemsWatcher = new InventoryWatcher ({
+			onSuccess: (items) => this.setState ({ items }),
+			onError:   (error) => this.setState ({ error })
+		})
+		this.state = { itemsWatcher }
 	}
 
 	componentDidMount () {
-		watchInventory (items => this.setState ({ items }))
+		this.state.itemsWatcher.start()
+	}
+
+	componentWillUnmount () {
+		this.state.itemsWatcher.end()
 	}
 
 	render () {

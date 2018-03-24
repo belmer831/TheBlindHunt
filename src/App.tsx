@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { StyleSheet } from 'react-native'
 
-// NOTE: Workaround for bad types
+// TODO: Fix broken types
 import * as RNRF from 'react-native-router-flux'
 const Router:any = RNRF.Router
 const Scene:any  = RNRF.Scene
@@ -23,20 +23,37 @@ import Inventory from './views/Inventory'
 import Scanner   from './views/Scanner'
 
 const styles = StyleSheet.create ({
+	scene: {
+		backgroundColor: 'black'
+	},
+	text: {
+		textAlign: 'center',
+		textAlignVertical: 'center',
+		fontSize: 20,
+		color: 'whitesmoke',
+	},
+	navbar: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'rgba(0,0,0,1)',
+	},
 	tabbar: {
-		backgroundColor: 'whitesmoke',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'rgba(0,0,0,1)',
 	},
 })
 
 interface Props {}
 interface State {
-	ready:     boolean,
-	listener?: Function,
-	user?:     User,
-	error?:    Error,
+	ready:  boolean,
+	user?:  User,
+	error?: Error,
 }
 
 export default class App extends Component<Props, State> {
+	authSubscription?: Function
+
 	constructor (props: Props) {
 		super (props)
 		
@@ -56,24 +73,15 @@ export default class App extends Component<Props, State> {
 	}
 
 	async onAuthStateChanged (user?: User) {
+		this.setState ({ user })
 		console.log (`onAuthStateChanged: user: ${user}`)
-		
-		if (user) {
-			// await ensureRegistration()
-			// await setupUserChests()
-		}
 	}
 
 	componentDidMount () {
-		const listener = Firebase.auth().onAuthStateChanged ((user?: User) => {
+		this.authSubscription = Firebase.auth().onAuthStateChanged ((user?: User) => {
 			this.setState ({ user })
-			/*
-			this.onAuthStateChanged (user)
-				.then (() => this.setState ({ user }))
-				.catch (error => this.setState ({ error }))
-			*/
+			console.log (`onAuthStateChanged: user: ${user}`)
 		})
-		this.setState ({ listener })
 		
 		this.onStart()
 			.then (() => this.setState ({ ready: true }))
@@ -81,8 +89,7 @@ export default class App extends Component<Props, State> {
 	}
 
 	componentWillUnmount () {
-		const { listener } = this.state
-		if (listener) listener() // ends auth subscription
+		if (this.authSubscription) this.authSubscription()
 	}
 
 	render () {
@@ -97,7 +104,10 @@ export default class App extends Component<Props, State> {
 		if (! ready) return <Loading />
 
 		return (
-			<Router>
+			<Router
+				navigationBarStyle={styles.navbar}
+				title={styles.text}
+			>
 				<Scene key='root'>
 					<Stack key='Auth' 
 						initial={(! user)}
@@ -111,11 +121,13 @@ export default class App extends Component<Props, State> {
 					<Stack key='Main' 
 						initial={(user)}
 					>
-						<Tabs
-							key='Wander'
+						<Tabs key='Wander'
 							swipeEnabled
 							showLabel
+							hideNavBar
 							tabBarStyle={styles.tabbar}
+							labelStyle={styles.text}
+							inactiveBackgroundColor='rgba(255,255,255,0.2)'
 						>
 							<Scene key='Detector' 
 								title='Detector' 

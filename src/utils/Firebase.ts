@@ -43,10 +43,13 @@ function exists (thing:any) {
 }
 
 function getEntries (snapshot: DataSnapshot): Entry<any>[] {
+	if (! snapshot.exists()) throw new Error ("Snapshot does not exist")
+	if (typeof snapshot !== 'object') throw new Error ("Snapshot is not an object")
+
 	const values:{[key:string]:any} = snapshot.val()
 	return Object.keys (values).map (key => ({
 		key: key,
-		val: values[key]
+		val: values[key],
 	}))
 }
 
@@ -137,27 +140,32 @@ abstract class FirebaseWatcher<T> {
 
 export class InventoryWatcher extends FirebaseWatcher<GameItems> {
 	ref () {
-		return RNFirebase.database().ref().child ('ChestContent')
+		return getUserData ('Inventory')
 	}
 
 	onChange (snapshot: DataSnapshot) {
 		try {
 			let items: GameItems = {
-				Coins: 0
+				Coins: 0,
 			}
 			
 			if (snapshot.exists ()) {
 				const coinSnap = snapshot.child ('Coins')
+				const itemsSnap = snapshot.child ('Items')
+
 				if (coinSnap.exists()) items.Coins = coinSnap.val()
-	
-				getEntries (snapshot.child ('Items')).forEach (entry => {
-					try {
-						const name = entry.val.Item.Name as string
-						const count = entry.val.Count as number
-						items[name] = count
-					}
-					catch {}
-				})
+				
+				// TODO: Fix itemsSnap.exists() is false
+				if (itemsSnap.exists()) {
+					getEntries (itemsSnap).forEach (entry => {
+						try {
+							const name = entry.val.Item.Name as string
+							const count = entry.val.Count as number
+							items[name] = count
+						}
+						catch {}
+					})
+				}
 			}
 			
 			this.onSuccess (items)
@@ -170,7 +178,7 @@ export class InventoryWatcher extends FirebaseWatcher<GameItems> {
 
 export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 	ref () {
-		return getUserData ('ChestContent')
+		return getUserData ('ChestContent') 
 	}
 
 	onChange (snapshot: DataSnapshot) {

@@ -134,9 +134,9 @@ export default class Detector extends Component<Props, State> {
 			error,
 		} = this.state
 
-		/* TODO: Handle Errors in Detector
-		if (error) throw error
-		*/
+		if (error) return (
+			<SimpleText text={error.message} />
+		)
 
 		if ((! chests) || (chests.length === undefined)) return (
 			<SimpleText text={"Missing Chests"} />

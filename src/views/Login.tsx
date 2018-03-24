@@ -8,6 +8,7 @@ import {
 	TouchableHighlight,
 	KeyboardAvoidingView,
 	ImageBackground,
+	ImageBackgroundProperties
 } from 'react-native'
 
 import Firebase from 'react-native-firebase'
@@ -33,7 +34,6 @@ const WINDOW_WIDTH = Dimensions.get('window').width
 const styles = StyleSheet.create ({
 	background: {
 		flex: 1,
-		// resizeMode: 'cover',
 	},
 	container: {
 		flex: 1,
@@ -132,11 +132,12 @@ export default class Login extends Component<Props, State> {
 		} = this.state
 
 		if (error) throw error
-
+		
 		return (
 			<ImageBackground 
 				source={BLURPLE_WALLPAPER} 
-				style={styles.background}
+				style={{ flex: 1 }}
+				resizeMode='contain'
 			>
 				<View style={styles.container}>
 
@@ -186,7 +187,7 @@ export default class Login extends Component<Props, State> {
 							size={GoogleSigninButton.Size.Standard}
 							color={GoogleSigninButton.Color.Light}
 							onPress={() => this.onPressGoogle()}
-							/>
+						/>
 					</View>
 				</View>
 			</ImageBackground>
