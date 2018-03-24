@@ -52,7 +52,7 @@ interface State {
 }
 
 export default class App extends Component<Props, State> {
-	authSubscription?: Function
+	private authSubscription?: Function
 
 	constructor (props: Props) {
 		super (props)

@@ -24,23 +24,23 @@ interface Props {
 }
 interface State {
 	content?: ChestContent,
-	contentWatcher: ChestContentWatcher,
 	error?: Error,
 }
 
 export default class Scanner extends Component<Props, State> {
+	private readonly contentWatcher: ChestContentWatcher
+
 	constructor (props: Props) {
 		super (props)
-		const contentWatcher = new ChestContentWatcher ({
+		this.contentWatcher = new ChestContentWatcher ({
 			onSuccess: (content) => this.setState ({ content }),
 			onError: (error) => this.setState ({ error })
 		})
-		this.state = { contentWatcher }
 	}
 
 	async onMount () {
 		await openChest (this.props.chestId)
-		await this.state.contentWatcher.start()
+		await this.contentWatcher.start()
 	}
 
 	componentDidMount () {
@@ -49,7 +49,7 @@ export default class Scanner extends Component<Props, State> {
 	}
 
 	componentWillUnmount () {
-		this.state.contentWatcher.end ()
+		this.contentWatcher.end ()
 	}
 
 	render () {
@@ -69,7 +69,10 @@ export default class Scanner extends Component<Props, State> {
 		return (
 			<View style={styles.container}>
 				<SimpleText text={message} />
-				<ItemCounts style={{ flex: 6 }} items={content.items} />
+				<ItemCounts 
+					style={{ flex: 6 }} 
+					items={content.items} 
+				/>
 			</View>
 		)
 	}

@@ -78,17 +78,19 @@ interface State {
 	coords?: LatLng,
 	chests?: ChestData[],
 	facing: number,
-	chestsWatcher: ChestDataWatcher,
-	locationWatcher: LocationWatcher,
+	
 	error?: Error,
 }
 
 export default class Detector extends Component<Props, State> {
 	
+	private readonly chestsWatcher:   ChestDataWatcher
+	private readonly locationWatcher: LocationWatcher
+
 	constructor (props: Props) {
 		super (props)
 
-		const locationWatcher = new LocationWatcher ({
+		this.locationWatcher = new LocationWatcher ({
 			onSuccess: ({ coords }) => { 
 				this.setState ({ coords })
 
@@ -98,27 +100,23 @@ export default class Detector extends Component<Props, State> {
 			onError: (error) => this.setState ({ error })
 		})
 
-		const chestsWatcher = new ChestDataWatcher ({
+		this.chestsWatcher = new ChestDataWatcher ({
 			onSuccess: (chests) => this.setState ({ chests }),
 			onError: (error) => this.setState ({ error })
 		})
 
-		this.state = { 
-			facing: 0,
-			locationWatcher,
-			chestsWatcher,
-		}
+		this.state = { facing: 0 }
 	}
 
 	componentDidMount () {
-		this.state.locationWatcher.start()
-		this.state.chestsWatcher.start()
+		this.locationWatcher.start()
+		this.chestsWatcher.start()
 		Compass.start (3, (facing) => this.setState ({ facing }))
 	}
 
 	componentWillUnmount () {
-		this.state.locationWatcher.end()
-		this.state.chestsWatcher.end()
+		this.locationWatcher.end()
+		this.chestsWatcher.end()
 		Compass.stop()
 	}
 
