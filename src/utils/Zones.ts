@@ -23,7 +23,7 @@ export interface ZoneData {
 export function findZone (bearing: number, distance: number): ZoneData | null {
 	let source
 
-	// TODO: Handle OUTER	
+	if (distance <= RINGS.OUTER)  source = RADAR.OUTER
 	if (distance <= RINGS.LARGE)  source = RADAR.LARGE
 	if (distance <= RINGS.MEDIUM) source = RADAR.MEDIUM
 	if (distance <= RINGS.SMALL)  source = RADAR.SMALL

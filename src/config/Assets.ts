@@ -12,5 +12,5 @@ export const RADAR = {
 	SMALL:  require ('../../assets/radar/small.png'),
 	MEDIUM: require ('../../assets/radar/medium.png'),
 	LARGE:  require ('../../assets/radar/large.png'),
-	// OUTER:  require ('../../assets/radar/outer.png'),
+	OUTER:  require ('../../assets/radar/outer.png'),
 }
