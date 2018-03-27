@@ -212,8 +212,8 @@ export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 
 export class ChestDataWatcher extends FirebaseWatcher<ChestData[]> {
 	ref () {
-		return getUserData ('Chests')
-		// return RNFirebase.database().ref().child ('Chests')
+		// return getUserData ('Chests')
+		return RNFirebase.database().ref().child ('Chests')
 	}
 
 	onChange (snapshot: DataSnapshot) {
