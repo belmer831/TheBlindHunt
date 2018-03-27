@@ -5,10 +5,12 @@ export const BLURPLE_WALLPAPER = require ('../../assets/blurple-wallpaper.png')
 export const SPINNER = require ('../../assets/spinner.gif')
 export const DARKROOM_SPLASH = require ('../../assets/darkroom-splash.png')
 
-export const PIESLICES = {
-	COMPLETE: require ('../../assets/pie-slices/complete.png'),
-	CENTER:   require ('../../assets/pie-slices/center.png'),
-	SMALL:    require ('../../assets/pie-slices/small.png'),
-	MEDIUM:   require ('../../assets/pie-slices/medium.png'),
-	LARGE:    require ('../../assets/pie-slices/large.png'),
+export const RADAR = {
+	ARROW:  require ('../../assets/radar/arrow.png'),
+	FRAME:  require ('../../assets/radar/frame.png'),
+	CENTER: require ('../../assets/radar/center.png'),
+	SMALL:  require ('../../assets/radar/small.png'),
+	MEDIUM: require ('../../assets/radar/medium.png'),
+	LARGE:  require ('../../assets/radar/large.png'),
+	// OUTER:  require ('../../assets/radar/outer.png'),
 }

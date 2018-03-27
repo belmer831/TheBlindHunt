@@ -13,8 +13,8 @@ export type Reference = RNFirebaseStatic.database.Reference
 
 import { LatLng } from 'react-native-maps'
 
-interface Callback<T> { (param: T): void }
-interface Events<T> {
+export interface Callback<T> { (param: T): void }
+export interface Events<T> {
 	onSuccess: Callback<T>
 	onError:   Callback<Error>
 }
@@ -33,16 +33,16 @@ export interface ChestData extends LatLng {
 	chestId: string,
 }
 
-interface Entry<T> {
+export interface Entry<T> {
 	key: string,
 	val: T,
 }
 
-function exists (thing:any) {
+export function exists (thing:any) {
 	return (! (! thing))
 }
 
-function getEntries (snapshot: DataSnapshot): Entry<any>[] {
+export function getEntries (snapshot: DataSnapshot): Entry<any>[] {
 	if (! snapshot.exists()) throw new Error ("Snapshot does not exist")
 	if (typeof snapshot !== 'object') throw new Error ("Snapshot is not an object")
 
@@ -53,13 +53,13 @@ function getEntries (snapshot: DataSnapshot): Entry<any>[] {
 	}))
 }
 
-function getCurrentUser () {
+export function getCurrentUser () {
 	const { currentUser } = RNFirebase.auth()
 	if (! currentUser) throw new Error ("No Current User")
 	return currentUser
 }
 
-function getUserData (child?: string) {
+export function getUserData (child?: string) {
 	let data = RNFirebase.database().ref()
 		.child ('UserData')
 		.child (getCurrentUser().uid)
@@ -86,7 +86,8 @@ export async function ensureRegistration () {
 }
 */
 
-/* NOTE: Probably unnecessary
+/* NOTE: Probably unnecessary 
+*/
 export async function setupUserChests () {
 	const snapshot = await getUserData ('Chests').once ('value')
 	if (! snapshot.exists ()) {
@@ -94,6 +95,7 @@ export async function setupUserChests () {
 		getUserData ('Location').remove()
 	}
 }
+/*
 */
 
 export async function updateLocation (coords:LatLng) {
@@ -112,7 +114,7 @@ export async function openChest (chestId: string): Promise<void> {
 	return wasOpenedRef.set (true)
 }
 
-abstract class FirebaseWatcher<T> {
+export abstract class FirebaseWatcher<T> {
 	onSuccess: Callback<T>
 	onError:   Callback<Error>
 
@@ -210,7 +212,8 @@ export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 
 export class ChestDataWatcher extends FirebaseWatcher<ChestData[]> {
 	ref () {
-		return getUserData ('Chests')
+		// return getUserData ('Chests')
+		return RNFirebase.database().ref().child ('Chests')
 	}
 
 	onChange (snapshot: DataSnapshot) {

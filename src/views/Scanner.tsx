@@ -16,6 +16,7 @@ import SimpleText from '../components/SimpleText'
 const styles = StyleSheet.create ({
 	container: {
 		flex: 1,
+		backgroundColor: 'black',
 	}
 })
 
@@ -27,6 +28,9 @@ interface State {
 	error?: Error,
 }
 
+/* TODO:
+	- Currently gives a warning for using setState when unmounted or something.
+*/
 export default class Scanner extends Component<Props, State> {
 	private readonly contentWatcher: ChestContentWatcher
 

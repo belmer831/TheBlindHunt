@@ -13,14 +13,14 @@ import { Actions } from 'react-native-router-flux'
 import Compass from 'react-native-simple-compass'
 import { Region, LatLng } from 'react-native-maps'
 
-import { PIESLICES } from '../config/Assets'
+import { RADAR } from '../config/Assets'
 import CompositeImage, { ImageSourceStyle } from '../components/CompositeImage'
 import SimpleText from '../components/SimpleText'
 import ClearButton from '../components/ClearButton'
 import { calcBetween } from '../utils/Coords'
 import { LocationWatcher } from '../utils/Location'
 import { ZoneData, findZone } from '../utils/Zones'
-import { 
+import {
 	updateLocation,
 	ChestDataWatcher,
 	ChestData,
@@ -34,8 +34,6 @@ const vertpad = Math.floor (((height * (9 / 10)) - width) / 2)
 const styles = StyleSheet.create ({
 	container: {
 		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center',
 		backgroundColor: 'black',
 	},
 	middle: {
@@ -59,11 +57,11 @@ const styles = StyleSheet.create ({
 		resizeMode: 'contain',
 	},
 	bottom: {
-		position: 'absolute',
-		top: vertpad + width,
-		bottom: 0,
-		left: 0,
-		right: 0,
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingTop: 20,
+		paddingBottom: 40,
 	},
 })
 
@@ -75,10 +73,9 @@ interface ProChest extends ChestData {
 
 interface Props {}
 interface State {
+	facing: number,
 	coords?: LatLng,
 	chests?: ChestData[],
-	facing: number,
-	
 	error?: Error,
 }
 
@@ -144,7 +141,7 @@ export default class Detector extends Component<Props, State> {
 			<SimpleText text={"Missing Coords"} />
 		)
 		
-		let centerChestId: string | undefined
+		let centerChestId: string | undefined = "id"
 
 		const proChests = chests
 			.map (chest => {
@@ -156,7 +153,7 @@ export default class Detector extends Component<Props, State> {
 
 		proChests.forEach (chest => {
 			const { zone, chestId } = chest
-			if (zone.source === PIESLICES.CENTER) {
+			if (zone.source === RADAR.CENTER) {
 				centerChestId = chestId
 			}
 		})
@@ -169,27 +166,32 @@ export default class Detector extends Component<Props, State> {
 			}
 			return { source, style }
 		})
-		
-		zones.unshift ({
-			source: PIESLICES.COMPLETE,
-			style: { transform: [{ rotateZ: `${-facing}deg` }]}
+
+		const baseZones = [ RADAR.ARROW, RADAR.FRAME ]
+		baseZones.forEach (src => {
+			zones.unshift ({
+				source: src,
+				style: { transform: [{ rotateZ: `${-facing}deg` }]}
+			})
 		})
 		
 		return (
-			<View style={{ flex: 1, backgroundColor: 'black' }}>
+			<View style={styles.container}>
 				<CompositeImage 
 					style={styles.middle}
 					wrapperStyle={styles.overlay}
 					imageStyle={styles.pieslice}
 					images={zones}
 				/>
-				<View style={{ flex: 1 }}>
-					{ (centerChestId) ? (
+				<View style={styles.bottom}>
+					{ (centerChestId) ? 
 						<ClearButton
 							text={'Scan'}
 							onPress={() => this.toScanner (centerChestId)}
 						/>
-					): undefined }
+						:
+						undefined 
+					}
 				</View>
 			</View>
 		)
