@@ -8,11 +8,11 @@ import { ImageRequireSource } from 'react-native';
 
 const SCALAR = 10
 const RINGS = {
-	CENTER:  1 * SCALAR,
+	CENTER:  2 * SCALAR,
 	SMALL:   5 * SCALAR,
-	MEDIUM: 10 * SCALAR,
-	LARGE:  15 * SCALAR,
-	OUTER:  30 * SCALAR,
+	MEDIUM:  9 * SCALAR,
+	LARGE:  14 * SCALAR,
+	OUTER:  24 * SCALAR,
 }
 
 export interface ZoneData {
