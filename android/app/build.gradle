@@ -141,6 +141,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-keep-awake')
     compile project(':react-native-simple-compass')
     compile project(':react-native-sensors')
     compile project(':react-native-vector-icons')

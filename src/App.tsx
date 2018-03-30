@@ -10,6 +10,7 @@ const Tabs:any   = RNRF.Tabs
 
 import { GoogleSignin } from 'react-native-google-signin'
 import Firebase from 'react-native-firebase'
+import KeepAwake from 'react-native-keep-awake'
 
 import { LocationPermission } from './utils/Permissions'
 import { User } from './utils/Firebase'
@@ -60,7 +61,7 @@ interface State {
 const TabProps = {
 	swipeEnabled: true,
 	showLabel:    true,
-	hideNavBar:   true,
+	// hideNavBar:   true,
 	tabBarStyle: styles.tabbar,
 	labelStyle:  styles.text,
 	inactiveBackgroundColor: 'grey'
@@ -93,6 +94,7 @@ export default class App extends Component<Props, State> {
 	}
 
 	componentDidMount () {
+		KeepAwake.activate()
 		this.authSubscription = Firebase.auth().onAuthStateChanged ((user?: User) => {
 			this.setState ({ user })
 			console.log (`onAuthStateChanged: user: ${user}`)
@@ -105,6 +107,7 @@ export default class App extends Component<Props, State> {
 
 	componentWillUnmount () {
 		if (this.authSubscription) this.authSubscription()
+		KeepAwake.deactivate()
 	}
 
 	render () {

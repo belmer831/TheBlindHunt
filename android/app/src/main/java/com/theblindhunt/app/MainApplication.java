@@ -12,6 +12,7 @@ import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 
 import com.facebook.react.ReactApplication;
+import com.corbt.keepawake.KCKeepAwakePackage;
 import com.reactlibrary.RNSimpleCompassPackage;
 import com.sensors.RNSensorsPackage;
 import com.facebook.react.ReactNativeHost;
@@ -34,6 +35,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new KCKeepAwakePackage(),
             new RNSimpleCompassPackage(),
             new RNSensorsPackage(),
             new VectorIconsPackage(),
