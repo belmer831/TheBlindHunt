@@ -2,26 +2,19 @@ import React, { Component } from 'react'
 import {
 	View,
 	StyleSheet,
-	Text,
-	Image,
-	ListView,
 } from 'react-native'
 
+import SimpleText from '../components/SimpleText'
 import {
-	GameItems,
 	InventoryWatcher,
+	GameItems,
 } from '../utils/Firebase'
-import ItemCounts from '../components/ItemCounts'
-import SimpleText from '../components/SimpleText';
 
-const itemNames = [
-	'Coins',
-	'Crown',
-	'Diamond',
-	'Necklace',
-	'Ring',
-	'Amulet',
-]
+interface Props {}
+interface State {
+	items?: GameItems,
+	error?: Error,
+}
 
 const styles = StyleSheet.create ({
 	container: {
@@ -29,51 +22,48 @@ const styles = StyleSheet.create ({
 	},
 })
 
-interface Props {}
-interface State {
-	itemsWatcher: InventoryWatcher,
-	items?: GameItems,
-	error?: Error,
-}
-
 export default class Inventory extends Component<Props, State> {
+	private readonly inventoryWatcher: InventoryWatcher
+
 	constructor (props: Props) {
 		super (props)
-		const itemsWatcher = new InventoryWatcher ({
+		this.state = {}
+
+		this.inventoryWatcher = new InventoryWatcher ({
 			onSuccess: (items) => this.setState ({ items }),
-			onError:   (error) => this.setState ({ error })
+			onError:   (error) => this.setState ({ error }),
 		})
-		this.state = { itemsWatcher }
 	}
 
 	componentDidMount () {
-		this.state.itemsWatcher.start()
+		this.inventoryWatcher.start()
 	}
 
 	componentWillUnmount () {
-		this.state.itemsWatcher.end()
+		this.inventoryWatcher.end()
 	}
 
 	render () {
-		const { 
+		const {
 			items,
 			error,
 		} = this.state
 
-		if (error) throw error
+		if (error) {
+			setInterval (() => this.setState ({ 
+				error: undefined 
+			}), 2000)
+			return <SimpleText text={error.message} />
+		}
 
 		if (! items) return (
-			<SimpleText text={'Missing Items'} />
+			<SimpleText text='Missing Items' />
 		)
 
-		const allItems = itemNames.map (name => {
-			let count = items[name]
-			if (! count) count = 0
-			return { name, count }
-		})
-
 		return (
-			<ItemCounts style={styles.container} items={items}/>
+			<View style={styles.container}>
+				<SimpleText text='Inventory Tiles' />
+			</View>
 		)
 	}
 }

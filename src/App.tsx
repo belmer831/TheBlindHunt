@@ -18,8 +18,11 @@ import { GOOGLE_SIGNIN_WEB_CLIENT_ID } from './config'
 
 import Loading   from './views/Loading'
 import Login     from './views/Login'
-import Inventory from './views/Inventory'
+
 import Scanner   from './views/Scanner'
+
+import Inventory     from './views/Inventory'
+import InventoryLogs from './views/InventoryLogs'
 
 import Detector     from './views/Detector'
 import DetectorMap  from './views/DetectorMap'
@@ -52,6 +55,15 @@ interface State {
 	ready:  boolean,
 	user?:  User,
 	error?: Error,
+}
+
+const TabProps = {
+	swipeEnabled: true,
+	showLabel:    true,
+	hideNavBar:   true,
+	tabBarStyle: styles.tabbar,
+	labelStyle:  styles.text,
+	inactiveBackgroundColor: 'grey'
 }
 
 export default class App extends Component<Props, State> {
@@ -125,33 +137,39 @@ export default class App extends Component<Props, State> {
 						initial={(user)}
 					>
 						<Tabs key='Detector'
-							initial
-							swipeEnabled
-							showLabel
-							hideNavBar
-							tabBarStyle={styles.tabbar}
-							labelStyle={styles.text}
-							inactiveBackgroundColor='rgba(255,255,255,0.2)'
+							// initial
+							{... TabProps}
 						>
-							<Scene key='Radar' 
+							<Scene key='DetectorRadar' 
 								title='Radar' 
 								component={Detector} 
 								initial
 							/>
-							<Scene key='Maps'
-								title='Maps'
+							<Scene key='DetectorMap'
+								title='Map'
 								component={DetectorMap}
 							/>
-							<Scene key='Logs'
+							<Scene key='DetectorLogs'
 								title='Logs'
 								component={DetectorLogs}
 							/>
 						</Tabs>
 
-						<Scene key='Inventory'
-							title='Inventory'
-							component={Inventory}
-						/>
+						<Tabs key='Inventory'
+							initial
+							{... TabProps}
+						>
+							<Scene key='InventoryTiles'
+								title='Tiles'
+								component={Inventory}
+								initial
+							/>
+							<Scene key='InventoryLogs'
+								title='Logs'
+								component={InventoryLogs}
+							/>
+						</Tabs>
+
 						<Scene key='Scanner' 
 							title='Scanner' 
 							component={Scanner} 
