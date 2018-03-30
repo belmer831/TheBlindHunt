@@ -33,23 +33,34 @@ class LocationWatcher {
 	}
 
 	async start () {
-		if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
-		if (this.id) throw new Error ("Location Watcher is already running")
-		this.id = navigator.geolocation.watchPosition (
-			(geo) => this.onSuccess (geo), 
-			(err) => this.onError (new Error (err.message)),
-			{
-				enableHighAccuracy: true,
-				timeout: 1000,
-				distanceFilter: 2,
-			}
-		)
+		try {
+			if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
+			if (this.id) throw new Error ("Location Watcher is already running")
+
+			this.id = navigator.geolocation.watchPosition (
+				(geo) => this.onSuccess (geo), 
+				(err) => this.onError (new Error (err.message)),
+				{
+					enableHighAccuracy: true,
+					timeout: 10000,
+					distanceFilter: 2,
+				}
+			)
+		}
+		catch (error) {
+			this.onError (error)
+		}
 	}
 
 	async end () {
-		if (! this.id) throw new Error ("Location Watcher is not running")
-		navigator.geolocation.clearWatch (this.id)
-		this.id = undefined
+		try {
+			if (! this.id) throw new Error ("Location Watcher is not running")
+			navigator.geolocation.clearWatch (this.id)
+			this.id = undefined
+		}
+		catch (error) {
+			this.onError (error)
+		}
 	}
 }
 

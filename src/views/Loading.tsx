@@ -8,7 +8,7 @@ import {
 	ImageBackground
 } from 'react-native'
 
-import { DARKROOM_SPLASH } from '../config/Assets'
+import { SPLASH } from '../config/Assets'
 
 const styles = StyleSheet.create ({
 	container: { 
@@ -25,7 +25,7 @@ export default class Loading extends PureComponent {
 	render () {
 		return (
 			<ImageBackground 
-				source={DARKROOM_SPLASH} 
+				source={SPLASH} 
 				style={{ flex: 1 }}
 				resizeMode='cover'
 			>

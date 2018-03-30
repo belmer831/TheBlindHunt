@@ -25,7 +25,7 @@ import {
 	REACT_LOGO,
 	USERNAME_ICON,
 	PASSWORD_ICON,
-	BLURPLE_WALLPAPER,
+	WALLPAPER,
 } from '../config/Assets'
 
 const WINDOW_WIDTH = Dimensions.get('window').width
@@ -134,7 +134,7 @@ export default class Login extends Component<Props, State> {
 		
 		return (
 			<ImageBackground 
-				source={BLURPLE_WALLPAPER} 
+				source={WALLPAPER} 
 				style={{ flex: 1 }}
 				resizeMode='contain'
 			>
@@ -153,7 +153,7 @@ export default class Login extends Component<Props, State> {
 						</Text>
 					</View>
 
-					{ /*
+					{ /* TODO: Email/Password Login
 					<KeyboardAvoidingView 
 						style={styles.form}
 						behavior='padding'

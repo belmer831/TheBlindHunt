@@ -12,14 +12,15 @@ import {
 import { Actions } from 'react-native-router-flux'
 import Compass from 'react-native-simple-compass'
 import { Region, LatLng } from 'react-native-maps'
-
 import { RADAR } from '../config/Assets'
-import CompositeImage, { ImageSourceStyle } from '../components/CompositeImage'
 import SimpleText from '../components/SimpleText'
 import ClearButton from '../components/ClearButton'
 import { calcBetween } from '../utils/Coords'
 import { LocationWatcher } from '../utils/Location'
 import { ZoneData, findZone } from '../utils/Zones'
+import CompositeImage, { 
+	ImageSourceStyle 
+} from '../components/CompositeImage'
 import {
 	updateLocation,
 	ChestDataWatcher,
@@ -72,10 +73,21 @@ interface ProChest extends ChestData {
 
 interface Props {}
 interface State {
-	facing: number,
+	facing:  number,
 	coords?: LatLng,
 	chests?: ChestData[],
-	error?: Error,
+	error?:  Error,
+}
+
+export function processChests (chests: ChestData[], coords: LatLng) {
+	return ( chests
+		.map (chest => {
+			const { bearing, distance } = calcBetween (coords, chest)
+			const zone = findZone (bearing, distance)
+			return { bearing, distance, zone, ...chest }
+		})
+		.filter (proChest => (proChest.zone !== null)) as ProChest[]
+	)
 }
 
 export default class Detector extends Component<Props, State> {
@@ -101,13 +113,17 @@ export default class Detector extends Component<Props, State> {
 			onError: (error) => this.setState ({ error })
 		})
 
-		this.state = { facing: 0 }
+		this.state = { 
+			facing: 0,
+		}
 	}
 
 	componentDidMount () {
 		this.locationWatcher.start()
 		this.chestsWatcher.start()
-		Compass.start (3, (facing) => this.setState ({ facing }))
+		Compass.start (3, facing => this.setState ({ 
+			facing: (-1 * facing)
+		}))
 	}
 
 	componentWillUnmount () {
@@ -128,11 +144,14 @@ export default class Detector extends Component<Props, State> {
 			error,
 		} = this.state
 
-		if (error) return (
-			<SimpleText text={error.message} />
-		)
+		if (error) {
+			setInterval (() => this.setState ({ 
+				error: undefined
+			}), 2000)
+			return <SimpleText text={error.message} />
+		}
 
-		if ((! chests) || (chests.length === undefined)) return (
+		if (! (chests && chests.length)) return (
 			<SimpleText text={"Missing Chests"} />
 		)
 
@@ -140,15 +159,9 @@ export default class Detector extends Component<Props, State> {
 			<SimpleText text={"Missing Coords"} />
 		)
 		
-		let centerChestId: string | undefined = "id"
+		let centerChestId: string | undefined
 
-		const proChests = chests
-			.map (chest => {
-				const { bearing, distance } = calcBetween (coords, chest)
-				const zone = findZone (bearing, distance)
-				return { bearing, distance, zone, ...chest }
-			})
-			.filter (proChest => (proChest.zone !== null)) as ProChest[]
+		const proChests = processChests (chests, coords)
 
 		proChests.forEach (chest => {
 			const { zone, chestId } = chest
@@ -161,7 +174,7 @@ export default class Detector extends Component<Props, State> {
 			const { source, rotation } = chest.zone
 			const style = {
 				tintColor: THIN_RED,
-				transform: [{ rotateZ: `${(rotation - facing)}deg` }]
+				transform: [{ rotateZ: `${(rotation + facing)}deg` }]
 			}
 			return { source, style }
 		})
@@ -170,7 +183,7 @@ export default class Detector extends Component<Props, State> {
 		baseZones.forEach (src => {
 			zones.unshift ({
 				source: src,
-				style: { transform: [{ rotateZ: `${-facing}deg` }]}
+				style: { transform: [{ rotateZ: `${facing}deg` }]}
 			})
 		})
 		

@@ -36,6 +36,7 @@ export default class Scanner extends Component<Props, State> {
 
 	constructor (props: Props) {
 		super (props)
+		this.state = {}
 		this.contentWatcher = new ChestContentWatcher ({
 			onSuccess: (content) => this.setState ({ content }),
 			onError: (error) => this.setState ({ error })
@@ -62,7 +63,11 @@ export default class Scanner extends Component<Props, State> {
 			error,
 		} = this.state
 
-		if (error) throw error
+		if (error) {
+			setInterval (() => this.setState ({ 
+				error: undefined
+			}), 2000)
+		}
 
 		if (! content) return (
 			<SimpleText text={'Chest Unopened'} />

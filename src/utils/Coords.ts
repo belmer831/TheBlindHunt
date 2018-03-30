@@ -1,6 +1,16 @@
 import { LatLng } from 'react-native-maps'
 import { DELTA } from '../config'
 
+export const DELTAS = {
+	latitudeDelta: DELTA,
+	longitudeDelta: DELTA,
+}
+
+export interface LatLngDelta {
+	latitudeDelta:  number,
+	longitudeDelta: number,
+}
+
 export function coordsToString (coords: LatLng) {
 	const { latitude, longitude } = coords
 	const latstr = latitude
@@ -8,7 +18,8 @@ export function coordsToString (coords: LatLng) {
 	return `(${latstr}, ${lonstr})`
 }
 
-export function coordsToRegion (coords: LatLng) {
+export function coordsToRegion (coords: LatLng, deltas?: LatLngDelta) {
+	if (! deltas) deltas = DELTAS
 	return {
 		latitude:  coords.latitude,
 		longitude: coords.longitude,
@@ -54,6 +65,22 @@ function radiansToDegrees (rad: number) {
 	return rad * 180 / Math.PI
 }
 
+export function calcCoords (
+	origin: LatLng,
+	dNorth: number,
+	dEast:  number,
+): LatLng {
+	const dLat = dNorth / EARTH_RADIUS
+	const dLon = dEast / (EARTH_RADIUS * 
+		Math.cos (degreesToRadians (origin.latitude))
+	)
+
+	return {
+		latitude:  origin.latitude  + radiansToDegrees (dLat),
+		longitude: origin.longitude + radiansToDegrees (dLon),
+	}
+}
+
 export function calcBetween (alpha: LatLng, bravo: LatLng): LineBetween {
 	const aLat = degreesToRadians (alpha.latitude)
 	const aLon = degreesToRadians (alpha.longitude)
@@ -87,6 +114,6 @@ export function calcBetween (alpha: LatLng, bravo: LatLng): LineBetween {
 
 	return {
 		bearing:  calcBearing(),
-		distance: calcDistance()
+		distance: calcDistance(),
 	}
 }

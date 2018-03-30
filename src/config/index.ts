@@ -5,4 +5,4 @@ export const GOOGLE_SIGNIN_WEB_CLIENT_ID = '471839243508-e4adts7gkiil76niaeceuos
  - Deltas are used to set the "height" of the camera in MapView.
  - The default delta when creating a Region from a LatLng.
 */
-export const DELTA = 0.02
+export const DELTA = 0.01

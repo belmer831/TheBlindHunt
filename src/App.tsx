@@ -18,9 +18,12 @@ import { GOOGLE_SIGNIN_WEB_CLIENT_ID } from './config'
 
 import Loading   from './views/Loading'
 import Login     from './views/Login'
-import Detector  from './views/Detector'
 import Inventory from './views/Inventory'
 import Scanner   from './views/Scanner'
+
+import Detector     from './views/Detector'
+import DetectorMap  from './views/DetectorMap'
+import DetectorLogs from './views/DetectorLogs'
 
 const styles = StyleSheet.create ({
 	scene: {
@@ -121,7 +124,8 @@ export default class App extends Component<Props, State> {
 					<Stack key='Main' 
 						initial={(user)}
 					>
-						<Tabs key='Wander'
+						<Tabs key='Detector'
+							initial
 							swipeEnabled
 							showLabel
 							hideNavBar
@@ -129,16 +133,25 @@ export default class App extends Component<Props, State> {
 							labelStyle={styles.text}
 							inactiveBackgroundColor='rgba(255,255,255,0.2)'
 						>
-							<Scene key='Detector' 
-								title='Detector' 
+							<Scene key='Radar' 
+								title='Radar' 
 								component={Detector} 
-								initial 
+								initial
 							/>
-							<Scene key='Inventory'
-								title='Inventory'
-								component={Inventory}
+							<Scene key='Maps'
+								title='Maps'
+								component={DetectorMap}
+							/>
+							<Scene key='Logs'
+								title='Logs'
+								component={DetectorLogs}
 							/>
 						</Tabs>
+
+						<Scene key='Inventory'
+							title='Inventory'
+							component={Inventory}
+						/>
 						<Scene key='Scanner' 
 							title='Scanner' 
 							component={Scanner} 

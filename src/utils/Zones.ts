@@ -6,8 +6,9 @@
 import { RADAR } from '../config/Assets'
 import { ImageRequireSource } from 'react-native';
 
-const SCALAR = 10
-const RINGS = {
+export const SCALAR = 10
+
+export const RINGS = {
 	CENTER:  1 * SCALAR,
 	SMALL:   5 * SCALAR,
 	MEDIUM: 10 * SCALAR,
@@ -15,9 +16,40 @@ const RINGS = {
 	OUTER:  30 * SCALAR,
 }
 
+export enum ZoneRing {
+	Center,
+	Small,
+	Medium,
+	Large,
+	Outer,
+}
+
 export interface ZoneData {
 	source: ImageRequireSource,
 	rotation: number,
+}
+
+export interface ZoneInfo {
+	ring: ZoneRing,
+	turn: number,
+}
+
+function toZoneRing (distance: number) {
+	if (distance <= RINGS.CENTER) return ZoneRing.Center
+	if (distance <= RINGS.SMALL)  return ZoneRing.Small
+	if (distance <= RINGS.MEDIUM) return ZoneRing.Medium
+	if (distance <= RINGS.LARGE)  return ZoneRing.Large
+	if (distance <= RINGS.OUTER)  return ZoneRing.Outer
+
+	return null
+}
+
+function toZoneInfo (bearing: number, distance: number): ZoneInfo | null {
+	const turn = Math.ceil (bearing / 90)
+	const ring = toZoneRing (distance)
+
+	if (ring) return { ring, turn }
+	else      return null
 }
 
 export function findZone (bearing: number, distance: number): ZoneData | null {
@@ -31,7 +63,7 @@ export function findZone (bearing: number, distance: number): ZoneData | null {
 	
 	if (! source) return null
 
-	const rotation = 90 * Math.floor (bearing / 90)
+	const rotation = 90 * Math.ceil (bearing / 90)
 
 	return { source, rotation }
 }
