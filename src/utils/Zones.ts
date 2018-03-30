@@ -7,7 +7,6 @@ import { RADAR } from '../config/Assets'
 import { ImageRequireSource } from 'react-native';
 
 export const SCALAR = 10
-
 export const RINGS = {
 	CENTER:  1 * SCALAR,
 	SMALL:   5 * SCALAR,
