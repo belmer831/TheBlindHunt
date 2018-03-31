@@ -14,3 +14,12 @@ export const RADAR = {
 	LARGE:  require ('../../assets/radar/large.png'),
 	OUTER:  require ('../../assets/radar/outer.png'),
 }
+
+export const ITEMS = {
+	AMULET:   require ('../../assets/items/amulet.png'),
+	CROWN:    require ('../../assets/items/crown.png'),
+	COIN:     require ('../../assets/items/coin.png'),
+	DIAMOND:  require ('../../assets/items/diamond.png'),
+	NECKLACE: require ('../../assets/items/necklace.png'),
+	RING:     require ('../../assets/items/ring.png'),
+}
