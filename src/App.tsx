@@ -39,10 +39,11 @@ const styles = StyleSheet.create ({
 		fontSize: 20,
 		color: 'whitesmoke',
 	},
-	navbar: {
+	navbar: { // SHOULD NOT EXIST
+		height: 0,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'rgba(0,0,0,1)',
+		backgroundColor: 'red',
 	},
 	tabbar: {
 		alignItems: 'center',
