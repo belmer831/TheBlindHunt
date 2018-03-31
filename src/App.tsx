@@ -61,7 +61,7 @@ interface State {
 const TabProps = {
 	swipeEnabled: true,
 	showLabel:    true,
-	// hideNavBar:   true,
+	hideNavBar:   true,
 	tabBarStyle: styles.tabbar,
 	labelStyle:  styles.text,
 	inactiveBackgroundColor: 'grey'

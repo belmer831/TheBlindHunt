@@ -11,7 +11,7 @@ import {
 	InventoryWatcher,
 } from '../utils/Firebase'
 import ItemCounts from '../components/ItemCounts'
-import SimpleText from '../components/SimpleText';
+import SimpleText from '../components/SimpleText'
 
 const itemNames = [
 	'Coins',
