@@ -7,9 +7,13 @@ import {
 	Dimensions,
 	Image,
 	ImageRequireSource,
+	TouchableOpacity,
 } from 'react-native'
 
+import { Actions } from 'react-native-router-flux'
+
 import SimpleText from '../components/SimpleText'
+
 import { ITEMS } from '../config/Assets'
 import {
 	InventoryWatcher,
@@ -17,7 +21,8 @@ import {
 	Entry,
 } from '../utils/Firebase'
 
-const WINDOW_WIDTH = Dimensions.get('window').width
+const WINDOW_HEIGHT = Dimensions.get('window').height
+const WINDOW_WIDTH  = Dimensions.get('window').width
 const SIZE = WINDOW_WIDTH / 5
 
 interface Props {}
@@ -32,9 +37,18 @@ const styles = StyleSheet.create ({
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: 'black',
+		paddingTop:    WINDOW_HEIGHT / 8,
+		paddingBottom: WINDOW_HEIGHT / 8,
+		paddingLeft:   WINDOW_WIDTH  / 8,
+		paddingRight:  WINDOW_WIDTH  / 8,
 	},
-	list: {
-		flex: 4,
+	listOuter: {
+		flex: 6,
+	},
+	listInner: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	tile: {
 		position: 'relative',
@@ -50,9 +64,25 @@ const styles = StyleSheet.create ({
 		backgroundColor: 'whitesmoke',
 	},
 	row: {
+		flex: 1,
 		flexDirection: 'row',
-		width: 3 * SIZE,
-		marginBottom: SIZE,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	rowTile: {
+		flex: 1,
+		flexDirection: 'row',
+
+		height: SIZE,
+		width: SIZE * 3,
+
+		borderRadius: SIZE / 10,
+		borderWidth: 5,
+		borderColor: 'lightgrey',
+
+		alignItems:     'center',
+		justifyContent: 'center',
+		backgroundColor: 'whitesmoke',
 	},
 	text: {
 		flex: 2,
@@ -63,8 +93,8 @@ const styles = StyleSheet.create ({
 	image: {
 		flex: 1,
 		alignSelf: 'center',
-		height: 7 * SIZE / 10,
-		width:  7 * SIZE / 10,
+		height: SIZE * 7 / 10,
+		width:  SIZE * 7 / 10,
 		tintColor: 'teal'
 	},
 })
@@ -102,6 +132,10 @@ export default class Inventory extends Component<Props, State> {
 		this.inventoryWatcher.end()
 	}
 
+	toDetector () {
+		Actions.Detector()
+	}
+
 	render () {
 		const {
 			items,
@@ -135,7 +169,6 @@ export default class Inventory extends Component<Props, State> {
 				}
 				return list
 			}, [] as Entry<ImageRequireSource>[])
-
 		
 		let idx = 0
 		while (itemList.length > 9) itemList.pop()
@@ -146,33 +179,51 @@ export default class Inventory extends Component<Props, State> {
 
 		return (
 			<View style={styles.container}>
-				<View style={[ styles.tile, styles.row ]}>
-					<Image 
-						style={styles.image}
-						source={ITEMS.COIN}
-						resizeMode='contain'
-					/>
-					<Text style={styles.text}>
-						{ items.Coins }
-					</Text>
+				<View style={styles.row}>
+					<View style={styles.rowTile}>
+						<Image 
+							style={styles.image}
+							source={ITEMS.COIN}
+							resizeMode='contain'
+						/>
+						<Text style={styles.text}>
+							{ items.Coins }
+						</Text>
+					</View>
 				</View>
-				<FlatList
-					data={itemList}
-					keyExtractor={entry => entry.key}
-					numColumns={3}
-					renderItem={ ({ item }) =>
-						<View style={styles.tile}>
-							{ (item.val) ?
-								<Image
-									style={styles.image}
-									source={item.val}
-								/>
-								:
-								undefined
-							}
-						</View>
-					}
-				/>
+
+				<View style={styles.listOuter}>
+					<FlatList
+						contentContainerStyle={styles.listInner}
+						data={itemList}
+						keyExtractor={entry => entry.key}
+						numColumns={3}
+						renderItem={ ({ item }) =>
+							<View style={styles.tile}>
+								{ (item.val) ?
+									<Image
+										style={styles.image}
+										source={item.val}
+										resizeMode='contain'
+									/>
+									:
+									undefined
+								}
+							</View>
+						}
+					/>
+				</View>
+				
+				<View style={styles.row}>
+					<TouchableOpacity
+						style={styles.rowTile}
+						onPress={() => this.toDetector()}
+					>
+						<Text style={styles.text}>
+							Detector
+						</Text>
+					</TouchableOpacity>
+				</View>
 			</View>
 		)
 	}
