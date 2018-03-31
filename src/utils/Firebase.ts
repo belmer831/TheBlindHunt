@@ -157,17 +157,10 @@ export class InventoryWatcher extends FirebaseWatcher<GameItems> {
 
 				if (coinSnap.exists()) items.Coins = coinSnap.val()
 				
-				// TODO: Fix itemsSnap.exists() is false
-				if (itemsSnap.exists()) {
-					getEntries (itemsSnap).forEach (entry => {
-						try {
-							const name = entry.val.Item.Name as string
-							const count = entry.val.Count as number
-							items[name] = count
-						}
-						catch {}
-					})
-				}
+				getEntries (itemsSnap).forEach (entry => {
+					const { key, val } = entry
+					items[key] = val
+				})
 			}
 			
 			this.onSuccess (items)
@@ -194,10 +187,10 @@ export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 			const id = snapshot.child ('ChestID').val() as string
 			items.Coins = snapshot.child ('Coins').val() as number
 
-			getEntries (snapshot.child ('ItemNames')).forEach (entry => {
+			getEntries (snapshot.child ('Items')).forEach (entry => {
 				try {
-					const name = entry.val
-					items[name] += 1
+					const { key, val } = entry
+					items[key] = val
 				}
 				catch {}
 			})
