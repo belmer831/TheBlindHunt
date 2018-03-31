@@ -158,10 +158,15 @@ export default class Detector extends Component<Props, State> {
 		if (! coords) return (
 			<SimpleText text={"Missing Coords"} />
 		)
-		
-		let centerChestId: string | undefined
 
 		const proChests = processChests (chests, coords)
+		
+		/* Center Chest ID
+			- Scanner requires a specific chest
+			- If this is defined then it's possible to Scan then the Scan Button will appear.
+			- Iterate through proChests to find which if any chest is in the center.
+		*/
+		let centerChestId: string | undefined
 
 		proChests.forEach (chest => {
 			const { zone, chestId } = chest
@@ -170,6 +175,12 @@ export default class Detector extends Component<Props, State> {
 			}
 		})
 		
+		/* Zones
+			- These are all the images that need to be rendered in CompositeImage.
+			- Includes every chest, the frame, and the north arrow.
+			- Every image needs to be rotated by facing to account for the compass.
+			- The chest images also need to be rotated to account for the multiple different zones each source image can represent.
+		*/
 		const zones:ImageSourceStyle[] = proChests.map (chest => {
 			const { source, rotation } = chest.zone
 			const style = {
