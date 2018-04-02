@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { StyleSheet } from 'react-native'
 
-// TODO: Fix broken types
+// TODO: Fix broken types using a typings file
 import * as RNRF from 'react-native-router-flux'
 const Router:any = RNRF.Router
 const Scene:any  = RNRF.Scene
