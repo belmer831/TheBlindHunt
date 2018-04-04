@@ -1,9 +1,7 @@
-import React, { PureComponent } from 'react'
-import {
-	View,
-} from 'react-native'
-import SimpleText from './SimpleText'
-import { GameItems } from '../utils/Firebase'
+import React, { PureComponent } from 'react';
+import { View } from 'react-native';
+import SimpleText from './SimpleText';
+import { GameItems } from '../utils/Firebase';
 
 const itemNames = [
 	'Coins',
@@ -12,29 +10,23 @@ const itemNames = [
 	'Necklace',
 	'Ring',
 	'Amulet',
-]
+];
 
 interface Props {
-	style: any, // ViewStyle
-	items: GameItems,
+	style: any;
+	items: GameItems;
 }
 
 export default class ItemCounts extends PureComponent<Props> {
-	render () {
-		let count = 0
+	render() {
+		const {
+			style,
+			items
+		} = this.props;
 		return (
-			<View style={this.props.style}>
-				{ itemNames.map (name => {
-					let amount = this.props.items[name]
-					if (! amount) amount = 0
-					return (
-						<SimpleText 
-							key={`line_${++count}`}
-							text={`${name}: ${amount}`} 
-						/>
-					)
-				})}
+			<View style={style}>
+				{itemNames.map((name: string, index: number) => <SimpleText key={`line_${index}`} text={`${name}: ${items[name] || 0}`} />)}
 			</View>
-		)
+		);
 	}
 }

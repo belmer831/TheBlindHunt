@@ -1,36 +1,24 @@
-import React, { Component } from 'react'
-import { 
-	Dimensions,
+import React, { Component } from 'react';
+import {
 	Image,
 	Text,
 	View,
 	StyleSheet,
-	TouchableHighlight,
-	KeyboardAvoidingView,
 	ImageBackground,
-} from 'react-native'
+} from 'react-native';
 
-import Firebase from 'react-native-firebase'
-import { 
-	GoogleSignin, 
+import Firebase from 'react-native-firebase';
+import {
+	GoogleSignin,
 	GoogleSigninButton,
-} from 'react-native-google-signin'
-
-import { SocialIcon } from 'react-native-elements'
-
-import UserInput from '../components/UserInput'
-import SubmitButton from '../components/SubmitButton'
+} from 'react-native-google-signin';
 
 import {
 	REACT_LOGO,
-	USERNAME_ICON,
-	PASSWORD_ICON,
 	WALLPAPER,
-} from '../config/Assets'
+} from '../assets';
 
-const WINDOW_WIDTH = Dimensions.get('window').width
-
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
 	background: {
 		flex: 1,
 	},
@@ -82,115 +70,79 @@ const styles = StyleSheet.create ({
 	socialText: {
 		color: 'white',
 	}
-})
+});
 
-interface Props {}
+interface Props { }
 interface State {
-	username: string,
-	password: string,
-	message?: string,
-	error?:   Error,
+	username: string;
+	password: string;
+	message?: string;
+	error?: Error;
 }
 
 export default class Login extends Component<Props, State> {
-	constructor (props: Props) {
-		super (props)
+	constructor(props: Props) {
+		super(props);
 		this.state = {
 			username: '',
 			password: '',
-		}
+		};
 	}
 
-	onSubmit () {
-		this.setState ({
-			message: "Email login is currently not supported"
-		})
+	onSubmit() {
+		this.setState({
+			message: 'Email login is currently not supported'
+		});
 	}
 
-	async loginWithGoogle () {
-		const data = await GoogleSignin.signIn()
-		if (! data.idToken) throw new Error ("No idToken")
+	async loginWithGoogle() {
+		const data = await GoogleSignin.signIn();
+		if(!data.idToken) throw new Error('No idToken');
 
-		const cred = Firebase.auth.GoogleAuthProvider.credential (data.idToken, data.accessToken)
+		const cred = Firebase.auth.GoogleAuthProvider.credential(data.idToken, data.accessToken);
 
-		await Firebase.auth().signInWithCredential (cred)
-		this.setState ({ message: "You should've been redirected" })
+		await Firebase.auth().signInWithCredential(cred);
+		this.setState({ message: "You should've been redirected" });
 	}
 
-	onPressGoogle () {
-		this.loginWithGoogle ()
-			.catch (error => this.setState ({ error }))
+	onPressGoogle() {
+		this.loginWithGoogle()
+			.catch(error => this.setState({ error }));
 	}
 
-	render () {
-		const { 
-			username,
-			password,
-			message, 
+	render() {
+		const {
+			message,
 			error,
-		} = this.state
+		} = this.state;
 
-		if (error) throw error
-		
+		if(error) throw error;
+
 		return (
-			<ImageBackground 
-				source={WALLPAPER} 
-				style={{ flex: 1 }}
-				resizeMode='contain'
-			>
+			<ImageBackground source={WALLPAPER} style={{ flex: 1 }} resizeMode='contain'>
 				<View style={styles.container}>
-
 					<View style={styles.brandContainer}>
 						<Image source={REACT_LOGO} style={styles.brandImage} />
-						<Text style={styles.brandText}> 
-							The Blind Hunt 
+						<Text style={styles.brandText}>
+							The Blind Hunt
 						</Text>
 					</View>
-
 					<View style={styles.messageContainer}>
 						<Text style={styles.messageText}>
-							{ message }
+							{message}
 						</Text>
 					</View>
-
-					{ /* TODO: Email/Password Login
-					<KeyboardAvoidingView 
-						style={styles.form}
-						behavior='padding'
-						>
-						<UserInput 
-							placeholder={'Username'}
-							logo={USERNAME_ICON} 
-							onChangeText={(text) => this.setState ({
-								username: text 
-							})}
-							/>
-						<UserInput 
-							placeholder={'Password'}
-							logo={PASSWORD_ICON}
-							secure
-							onChangeText={(text) => this.setState ({
-								password: text
-							})}
-							/>
-					</KeyboardAvoidingView>
-
-					<View style={styles.submit}>
-						<SubmitButton onPress={() => this.onSubmit()} />
-					</View>
-						*/ }
-					
 					<View style={styles.socialContainer}>
 						<GoogleSigninButton
 							style={{ width: 230, height: 48 }}
 							size={GoogleSigninButton.Size.Standard}
 							color={GoogleSigninButton.Color.Light}
+							// tslint:disable-next-line:jsx-no-lambda
 							onPress={() => this.onPressGoogle()}
 						/>
 					</View>
 				</View>
 			</ImageBackground>
-		)
+		);
 	}
 }
-

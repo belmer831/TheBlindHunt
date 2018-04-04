@@ -1,38 +1,31 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
-	TouchableHighlight,
 	StyleSheet,
-	Text,
 	View,
 	Dimensions,
-	Image,
-	Animated,
-} from 'react-native'
+} from 'react-native';
 
-import { Actions } from 'react-native-router-flux'
-import Compass from 'react-native-simple-compass'
-import { Region, LatLng } from 'react-native-maps'
-import { RADAR } from '../config/Assets'
-import SimpleText from '../components/SimpleText'
-import ClearButton from '../components/ClearButton'
-import { calcBetween } from '../utils/Coords'
-import { LocationWatcher } from '../utils/Location'
-import { ZoneData, findZone } from '../utils/Zones'
-import CompositeImage, { 
-	ImageSourceStyle 
-} from '../components/CompositeImage'
+import { Actions } from 'react-native-router-flux';
+import Compass from 'react-native-simple-compass';
+import { LatLng } from 'react-native-maps';
+import { RADAR } from '../assets';
+import SimpleText from '../components/SimpleText';
+import ClearButton from '../components/ClearButton';
+import { calcBetween } from '../utils/Coords';
+import LocationWatcher from '../utils/Location';
+import { ZoneData, findZone } from '../utils/Zones';
+import CompositeImage, { ImageSourceStyle } from '../components/CompositeImage';
 import {
 	updateLocation,
 	ChestDataWatcher,
 	ChestData,
-} from '../utils/Firebase'
+} from '../utils/Firebase';
 
-const THIN_RED = 'rgba(243,53,6,0.5)'
+const THIN_RED = 'rgba(243,53,6,0.5)';
 
-const { height, width } = Dimensions.get ('window')
-const vertpad = Math.floor (((height * (9 / 10)) - width) / 2)
+const { width } = Dimensions.get('window');
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: 'black',
@@ -63,149 +56,118 @@ const styles = StyleSheet.create ({
 		justifyContent: 'center',
 		paddingBottom: 40,
 	},
-})
+});
 
 interface ProChest extends ChestData {
-	bearing: number,
-	distance: number,
-	zone: ZoneData,
+	bearing: number;
+	distance: number;
+	zone: ZoneData;
 }
 
-interface Props {}
+interface Props { }
 interface State {
-	facing:  number,
-	coords?: LatLng,
-	chests?: ChestData[],
-	error?:  Error,
+	facing: number;
+	coords?: LatLng;
+	chests?: ChestData[];
+	error?: Error;
 }
 
-export function processChests (chests: ChestData[], coords: LatLng) {
-	return ( chests
-		.map (chest => {
-			const { bearing, distance } = calcBetween (coords, chest)
-			const zone = findZone (bearing, distance)
-			return { bearing, distance, zone, ...chest }
+export function processChests(chests: ChestData[], coords: LatLng) {
+	return (chests
+		.map(chest => {
+			const { bearing, distance } = calcBetween(coords, chest);
+			const zone = findZone(bearing, distance);
+			return { bearing, distance, zone, ...chest };
 		})
-		.filter (proChest => (proChest.zone !== null)) as ProChest[]
-	)
+		.filter(proChest => (proChest.zone !== null)) as ProChest[]
+	);
 }
 
 export default class Detector extends Component<Props, State> {
-	
-	private readonly chestsWatcher:   ChestDataWatcher
-	private readonly locationWatcher: LocationWatcher
+	private readonly chestsWatcher: ChestDataWatcher;
+	private readonly locationWatcher: LocationWatcher;
 
-	constructor (props: Props) {
-		super (props)
+	public constructor(props: Props) {
+		super(props);
 
-		this.locationWatcher = new LocationWatcher ({
-			onSuccess: ({ coords }) => { 
-				this.setState ({ coords })
+		this.locationWatcher = new LocationWatcher(
+			({ coords }) => {
+				this.setState({ coords });
 
-				updateLocation (coords)
-					.catch (error => this.setState ({ error }))
+				updateLocation(coords)
+					.catch(error => this.setState({ error }));
 			},
-			onError: (error) => this.setState ({ error })
-		})
+			(error) => this.setState({ error })
+		);
 
-		this.chestsWatcher = new ChestDataWatcher ({
-			onSuccess: (chests) => this.setState ({ chests }),
-			onError: (error) => this.setState ({ error })
-		})
+		this.chestsWatcher = new ChestDataWatcher(
+			(chests) => this.setState({ chests }),
+			(error) => this.setState({ error })
+		);
 
-		this.state = { 
-			facing: 0,
-		}
+		this.state = { facing: 0 };
 	}
 
-	componentDidMount () {
-		this.locationWatcher.start()
-		this.chestsWatcher.start()
-		Compass.start (3, facing => this.setState ({ 
-			facing: (-1 * facing)
-		}))
+	public componentDidMount() {
+		this.locationWatcher.Start();
+		this.chestsWatcher.Start();
+		Compass.start(3, facing => this.setState({ facing: (-1 * facing) }));
 	}
 
-	componentWillUnmount () {
-		this.locationWatcher.end()
-		this.chestsWatcher.end()
-		Compass.stop()
+	public componentWillUnmount() {
+		this.locationWatcher.Stop();
+		this.chestsWatcher.Stop();
+		Compass.stop();
 	}
 
-	toScanner (chestId?: string) {
-		if (chestId) Actions.Scanner ({ chestId })
-	}
-
-	render () {
+	public render() {
 		const {
 			coords,
 			facing,
 			chests,
 			error,
-		} = this.state
+		} = this.state;
 
-		if (error) {
-			setInterval (() => this.setState ({ 
-				error: undefined
-			}), 2000)
-			return <SimpleText text={error.message} />
+		if(error) {
+			setInterval(() => this.setState({ error: undefined }), 2000);
+			return <SimpleText text={error.message} />;
 		}
 
-		if (! (chests && chests.length)) return (
-			<SimpleText text={"Missing Chests"} />
-		)
+		if(!(chests && chests.length)) return <SimpleText text={'Missing Chests'} />;
 
-		if (! coords) return (
-			<SimpleText text={"Missing Coords"} />
-		)
-		
-		let centerChestId: string | undefined
+		if(!coords) return <SimpleText text={'Missing Coords'} />;
 
-		const proChests = processChests (chests, coords)
+		let centerChestId: string | undefined;
 
-		proChests.forEach (chest => {
-			const { zone, chestId } = chest
-			if (zone.source === RADAR.CENTER) {
-				centerChestId = chestId
-			}
-		})
-		
-		const zones:ImageSourceStyle[] = proChests.map (chest => {
-			const { source, rotation } = chest.zone
+		const zones: ImageSourceStyle[] = processChests(chests, coords).map(chest => {
+			const { source, rotation } = chest.zone;
+			if(source === RADAR.CENTER) centerChestId = chest.chestId;
 			const style = {
 				tintColor: THIN_RED,
 				transform: [{ rotateZ: `${(rotation + facing)}deg` }]
-			}
-			return { source, style }
-		})
+			};
+			return { source, style };
+		});
 
-		const baseZones = [ RADAR.ARROW, RADAR.FRAME ]
-		baseZones.forEach (src => {
-			zones.unshift ({
+		[RADAR.ARROW, RADAR.FRAME].forEach(src => {
+			zones.unshift({
 				source: src,
-				style: { transform: [{ rotateZ: `${facing}deg` }]}
-			})
-		})
-		
+				style: { transform: [{ rotateZ: `${facing}deg` }] }
+			});
+		});
+
 		return (
 			<View style={styles.container}>
-				<CompositeImage 
-					style={styles.middle}
-					wrapperStyle={styles.overlay}
-					imageStyle={styles.pieslice}
-					images={zones}
-				/>
+				<CompositeImage style={styles.middle} wrapperStyle={styles.overlay} imageStyle={styles.pieslice} images={zones} />
 				<View style={styles.bottom}>
-					{ (centerChestId) ? 
-						<ClearButton
-							text={'Scan'}
-							onPress={() => this.toScanner (centerChestId)}
-						/>
+					{(centerChestId) ?
+						// tslint:disable-next-line:jsx-no-lambda
+						<ClearButton text={'Scan'} onPress={() => Actions.Scanner({ centerChestId })} />
 						:
-						undefined 
+						undefined
 					}
 				</View>
 			</View>
-		)
+		);
 	}
 }

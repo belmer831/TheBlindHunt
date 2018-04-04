@@ -1,69 +1,69 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
 	View,
 	StyleSheet,
-} from 'react-native'
+} from 'react-native';
 
-import SimpleText from '../components/SimpleText'
+import SimpleText from '../components/SimpleText';
 import {
 	InventoryWatcher,
 	GameItems,
-} from '../utils/Firebase'
+} from '../utils/Firebase';
 
-interface Props {}
+interface Props { }
 interface State {
-	items?: GameItems,
-	error?: Error,
+	items?: GameItems;
+	error?: Error;
 }
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-})
+});
 
 export default class Inventory extends Component<Props, State> {
-	private readonly inventoryWatcher: InventoryWatcher
+	private readonly inventoryWatcher: InventoryWatcher;
 
-	constructor (props: Props) {
-		super (props)
-		this.state = {}
+	constructor(props: Props) {
+		super(props);
+		this.state = {};
 
-		this.inventoryWatcher = new InventoryWatcher ({
-			onSuccess: (items) => this.setState ({ items }),
-			onError:   (error) => this.setState ({ error }),
-		})
+		this.inventoryWatcher = new InventoryWatcher(
+			(items) => this.setState({ items }),
+			(error) => this.setState({ error }),
+		);
 	}
 
-	componentDidMount () {
-		this.inventoryWatcher.start()
+	componentDidMount() {
+		this.inventoryWatcher.Start();
 	}
 
-	componentWillUnmount () {
-		this.inventoryWatcher.end()
+	componentWillUnmount() {
+		this.inventoryWatcher.Stop();
 	}
 
-	render () {
+	render() {
 		const {
 			items,
 			error,
-		} = this.state
+		} = this.state;
 
-		if (error) {
-			setInterval (() => this.setState ({ 
-				error: undefined 
-			}), 2000)
-			return <SimpleText text={error.message} />
+		if(error) {
+			setInterval(() => this.setState({
+				error: undefined
+			}), 2000);
+			return <SimpleText text={error.message} />;
 		}
 
-		if (! items) return (
+		if(!items) return (
 			<SimpleText text='Missing Items' />
-		)
+		);
 
 		return (
 			<View style={styles.container}>
 				<SimpleText text='Inventory Tiles' />
 			</View>
-		)
+		);
 	}
 }

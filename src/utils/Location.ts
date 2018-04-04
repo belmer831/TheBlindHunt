@@ -1,71 +1,43 @@
-import { LocationPermission } from './Permissions'
-import {
-	GeolocationReturnType as Geostamp, 
-	GeolocationError
-} from 'react-native'
+import { LocationPermission } from './Permissions';
+import { GeolocationReturnType } from 'react-native';
+import Watcher from './Watcher';
 
-interface Callback<T> { (param: T): void }
+export type Geostamp = GeolocationReturnType;
 
-// TODO: Use Geolocation Options
-async function getCurrentLocation () {
-	if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
-
-	return new Promise<Geostamp> ((resolve, reject) => {
-		navigator.geolocation.getCurrentPosition (resolve, reject)
-	})
+export async function CurrentLocation() {
+	if(!LocationPermission.isGranted()) throw new Error('Location Permission Required');
+	return new Promise<Geostamp>((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true }));
 }
 
-class LocationWatcher {
-	onSuccess: Callback<Geostamp>
-	onError:   Callback<Error>
-	private id?: number
+export default class LocationWatcher extends Watcher<Geostamp> {
+	private mId: number | undefined;
 
-	constructor (events: { 
-		onSuccess: Callback<Geostamp>,
-		onError:   Callback<Error>
-	}) {
-		this.onSuccess = events.onSuccess
-		this.onError   = events.onError
-	}
+	public get IsRunning(): boolean { return (this.mId !== undefined); }
 
-	isRunning () {
-		return (this.id !== undefined)
-	}
-
-	async start () {
+	public async Start(): Promise<void> {
 		try {
-			if (! LocationPermission.isGranted()) throw new Error ("Location Permission Required")
-			if (this.id) throw new Error ("Location Watcher is already running")
+			if(!LocationPermission.isGranted()) throw new Error('Location Permission Required');
+			if(this.mId) throw new Error('Location Watcher is already running');
 
-			this.id = navigator.geolocation.watchPosition (
-				(geo) => this.onSuccess (geo), 
-				(err) => this.onError (new Error (err.message)),
-				{
-					enableHighAccuracy: true,
-					timeout: 10000,
-					distanceFilter: 2,
-				}
-			)
+			const options: any = {
+				enableHighAccuracy: true,
+				distanceFilter: 0.01
+			};
+
+			this.mId = navigator.geolocation.watchPosition(
+				(geo) => this.OnSuccess(geo),
+				(error) => this.OnFailure(new Error(error.message)),
+				options);
 		}
-		catch (error) {
-			this.onError (error)
-		}
+		catch(error) { this.OnFailure(error); }
 	}
 
-	async end () {
+	public async Stop(): Promise<void> {
 		try {
-			if (! this.id) throw new Error ("Location Watcher is not running")
-			navigator.geolocation.clearWatch (this.id)
-			this.id = undefined
+			if(!this.mId) throw new Error('Location Watcher is not running');
+			navigator.geolocation.clearWatch(this.mId);
+			this.mId = undefined;
 		}
-		catch (error) {
-			this.onError (error)
-		}
+		catch(error) { this.OnFailure(error); }
 	}
-}
-
-export {
-	Geostamp,
-	getCurrentLocation,
-	LocationWatcher,
 }

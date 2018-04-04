@@ -1,12 +1,12 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
 	StyleSheet,
 	Text,
 	TouchableHighlight,
 	View,
-} from 'react-native'
+} from 'react-native';
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		flexDirection: 'row',
@@ -23,7 +23,7 @@ const styles = StyleSheet.create ({
 		paddingBottom: 20,
 		paddingLeft: 40,
 		paddingRight: 40,
-		
+
 		borderColor: 'white',
 
 		alignItems: 'center',
@@ -34,28 +34,25 @@ const styles = StyleSheet.create ({
 		color: 'white',
 		fontSize: 40,
 	},
-})
+});
 
 interface Props {
-	onPress: () => void,
-	text: string,
+	onPress: () => void;
+	text: string;
 }
 
-class ClearButton extends Component<Props> {
-
-	render () {
+export default class ClearButton extends Component<Props> {
+	render() {
 		return (
 			<View style={styles.container}>
-				<TouchableHighlight onPress={() => this.props.onPress()}>
+				<TouchableHighlight onPress={this.props.onPress}>
 					<View style={styles.button}>
-						<Text style={styles.text}> 
-							{this.props.text} 
+						<Text style={styles.text}>
+							{this.props.text}
 						</Text>
 					</View>
 				</TouchableHighlight>
 			</View>
-		)
+		);
 	}
 }
-
-export default ClearButton

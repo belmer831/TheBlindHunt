@@ -1,38 +1,29 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent } from 'react';
 import {
 	View,
-	Text,
-	Image,
 	ActivityIndicator,
 	StyleSheet,
 	ImageBackground
-} from 'react-native'
+} from 'react-native';
 
-import { SPLASH } from '../config/Assets'
+import { SPLASH } from '../assets';
 
-const styles = StyleSheet.create ({
-	container: { 
+const styles = StyleSheet.create({
+	container: {
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-})
-
-interface Props {}
-interface State {}
+});
 
 export default class Loading extends PureComponent {
-	render () {
+	render() {
 		return (
-			<ImageBackground 
-				source={SPLASH} 
-				style={{ flex: 1 }}
-				resizeMode='cover'
-			>
+			<ImageBackground source={SPLASH} style={{ flex: 1 }} resizeMode='cover'>
 				<View style={styles.container}>
-					<ActivityIndicator animating />
+					<ActivityIndicator animating={true} />
 				</View>
 			</ImageBackground>
-		)
+		);
 	}
 }

@@ -1,80 +1,47 @@
-import React, { Component } from 'react'
-import {
-	View,
-	StyleSheet,
-	Text,
-	Image,
-} from 'react-native'
+import React, { Component } from 'react';
 
 import {
 	GameItems,
 	InventoryWatcher,
-} from '../utils/Firebase'
-import ItemCounts from '../components/ItemCounts'
+} from '../utils/Firebase';
+import ItemCounts from '../components/ItemCounts';
 import SimpleText from '../components/SimpleText';
 
-const itemNames = [
-	'Coins',
-	'Crown',
-	'Diamond',
-	'Necklace',
-	'Ring',
-	'Amulet',
-]
-
-const styles = StyleSheet.create ({
-	container: {
-		flex: 1,
-	},
-})
-
-interface Props {}
+interface Props { }
 interface State {
-	items?: GameItems,
-	error?: Error,
+	items?: GameItems;
+	error?: Error;
 }
 
 export default class InventoryLogs extends Component<Props, State> {
-	private readonly inventoryWatcher: InventoryWatcher
+	private readonly inventoryWatcher: InventoryWatcher;
 
-	constructor (props: Props) {
-		super (props)
-		this.state = {}
+	constructor(props: Props) {
+		super(props);
+		this.state = {};
 
-		this.inventoryWatcher = new InventoryWatcher ({
-			onSuccess: (items) => this.setState ({ items }),
-			onError:   (error) => this.setState ({ error })
-		})
+		this.inventoryWatcher = new InventoryWatcher(
+			(items) => this.setState({ items }),
+			(error) => this.setState({ error })
+		);
 	}
 
-	componentDidMount () {
-		this.inventoryWatcher.start()
-	}
+	componentDidMount() { this.inventoryWatcher.Start(); }
 
-	componentWillUnmount () {
-		this.inventoryWatcher.end()
-	}
+	componentWillUnmount() { this.inventoryWatcher.Stop(); }
 
-	render () {
-		const { 
+	render() {
+		const {
 			items,
 			error,
-		} = this.state
+		} = this.state;
 
-		if (error) throw error
+		if(error) throw error;
 
-		if (! items) return (
-			<SimpleText text={'Missing Items'} />
-		)
-
-		const allItems = itemNames.map (name => {
-			let count = items[name]
-			if (! count) count = 0
-			return { name, count }
-		})
+		if(!items) return <SimpleText text={'Missing Items'} />;
 
 		return (
-			<ItemCounts style={styles.container} items={items}/>
-		)
+			<ItemCounts style={{ flex: 1 }} items={items} />
+		);
 	}
 }

@@ -1,6 +1,11 @@
 {
-	"extends": [
-		"tslint-react",
-		"tslint-eslint-rules"
-	]
+	"rules": {
+		"semicolon": true,
+		"quotemark": [
+			true,
+			"single",
+			"avoid-escape"
+		],
+		"trailing-comma": false
+	}
 }

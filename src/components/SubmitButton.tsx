@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
 	Dimensions,
 	StyleSheet,
@@ -6,20 +6,17 @@ import {
 	Text,
 	Animated,
 	Easing,
-	Image,
-	Alert,
-	View,
-} from 'react-native'
+	Image
+} from 'react-native';
 
-import { SPINNER } from '../config/Assets'
+import { SPINNER } from '../assets';
 
-const WINDOW_WIDTH  = Dimensions.get ('window').width
-const WINDOW_HEIHGT = Dimensions.get ('window').height
-const MARGIN = 40
-const FILL_COLOR = '#F035E0'
-const IMAGE_SIZE = 24
+const WINDOW_WIDTH = Dimensions.get('window').width;
+const MARGIN = 40;
+const FILL_COLOR = '#F035E0';
+const IMAGE_SIZE = 24;
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
 	button: {
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -47,92 +44,85 @@ const styles = StyleSheet.create ({
 		width: IMAGE_SIZE,
 		height: IMAGE_SIZE,
 	}
-})
+});
 
 interface Props {
-	onPress: Function,
+	onPress: Function;
 }
 interface State {
-	loading: boolean,
+	loading: boolean;
 }
 
 export default class LoaderButton extends Component<Props, State> {
-	
+
 	animations: {
 		button: Animated.Value,
-		grow:   Animated.Value,
-	}
-	
-	constructor (props: Props) {
-		super (props)
+		grow: Animated.Value,
+	};
+
+	constructor(props: Props) {
+		super(props);
 
 		this.state = {
 			loading: false,
-		}
+		};
 
 		this.animations = {
 			button: new Animated.Value(0),
-			grow:   new Animated.Value(0),
-		}
+			grow: new Animated.Value(0),
+		};
 	}
 
-	onPress () {
-		if (this.state.loading) return
+	onPress() {
+		if(this.state.loading) return;
 
-		this.setState ({ loading: true })
+		this.setState({ loading: true });
 
-		Animated.timing (this.animations.button, {
+		Animated.timing(this.animations.button, {
 			toValue: 1,
 			duration: 200,
 			easing: Easing.linear,
-		}).start()
+		}).start();
 
 		// NOTE: Why does this have a timeout?
-		setTimeout (() => this.onGrow(), 2000)
+		setTimeout(() => this.onGrow(), 2000);
 
-		setTimeout (() => {
-			this.props.onPress()
-			this.setState ({ loading: false })
-			this.animations.button.setValue(0)
-			this.animations.grow.setValue(0)
-		}, 2300)
+		setTimeout(() => {
+			this.props.onPress();
+			this.setState({ loading: false });
+			this.animations.button.setValue(0);
+			this.animations.grow.setValue(0);
+		}, 2300);
 	}
 
-	onGrow () {
-		Animated.timing (this.animations.grow, {
+	onGrow() {
+		Animated.timing(this.animations.grow, {
 			toValue: 1,
 			duration: 200,
 			easing: Easing.linear,
-		}).start()
+		}).start();
 	}
 
-	render () {
-		const { loading } = this.state
-
-		const changeWidth = this.animations.button.interpolate ({
+	render() {
+		const changeWidth = this.animations.button.interpolate({
 			inputRange: [0, 1],
-			outputRange: [ WINDOW_WIDTH - MARGIN, MARGIN ]
-		})
-
-		const changeScale = this.animations.grow.interpolate ({
-			inputRange: [0, 1],
-			outputRange: [1, MARGIN]
-		})
+			outputRange: [WINDOW_WIDTH - MARGIN, MARGIN]
+		});
 
 		return (
 			<Animated.View style={{ width: changeWidth }}>
-				<TouchableOpacity 
+				<TouchableOpacity
 					style={styles.button}
-					onPress={() => this.onPress}
+					onPress={this.onPress}
 					activeOpacity={1}
-					>
-					{ this.state.loading ?
-						<Image source={SPINNER} style={styles.image}/>
+				>
+					{this.state.loading ?
+						<Image source={SPINNER} style={styles.image} />
 						:
 						<Text style={styles.text}> Submit </Text>
 					}
 				</TouchableOpacity>
 			</Animated.View>
-		)
+		);
 	}
 }

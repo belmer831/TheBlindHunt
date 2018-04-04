@@ -8,103 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:471839243508:android:7e8f20b9397aa28b",
-        "android_client_info": {
-          "package_name": "com.theblindhunt"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "471839243508-e4adts7gkiil76niaeceuos1s9tqdegd.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "471839243508-q2fjqmcf3o9hpd9ffrnrgrafmf85sftp.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.theblindhunt",
-            "certificate_hash": "ed676dcceafd9bc2f6a584a7ebe2a508af775680"
-          }
-        },
-        {
-          "client_id": "471839243508-hdrmdajhps25j4rhtr9jurt3fng29bja.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.theblindhunt",
-            "certificate_hash": "1283ec4e0f481d6d3b7ba4dbc055793f1bcff60a"
-          }
-        },
-        {
-          "client_id": "471839243508-d3jna1hkl6i3hadspojs3s6b5g569g51.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD8XwtPMdwgRTpY4fA4kqvmr-7LHkcNedg"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "471839243508-e4adts7gkiil76niaeceuos1s9tqdegd.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:471839243508:android:645513aecbf91738",
-        "android_client_info": {
-          "package_name": "com.test"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "471839243508-e4adts7gkiil76niaeceuos1s9tqdegd.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "471839243508-d3jna1hkl6i3hadspojs3s6b5g569g51.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD8XwtPMdwgRTpY4fA4kqvmr-7LHkcNedg"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:471839243508:android:30641b41b8dd80b8",
         "android_client_info": {
           "package_name": "com.theblindhunt.app"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "471839243508-ht3berj4qtle57g95tlefh65jr4d0vok.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.theblindhunt.app",
+            "certificate_hash": "1283ec4e0f481d6d3b7ba4dbc055793f1bcff60a"
+          }
+        },
         {
           "client_id": "471839243508-ku2eigum1e47urj9as94ug8scj1kiing.apps.googleusercontent.com",
           "client_type": 1,

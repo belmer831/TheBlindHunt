@@ -1,55 +1,41 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 import {
 	Image,
 	ImageRequireSource,
-	StyleSheet,
 	View,
 	ImageStyle,
 	ViewStyle,
-} from 'react-native'
-
-interface PositionedViewStyle extends ViewStyle {
-	position: 'absolute',
-	top: number,
-	bottom: number,
-	left: number,
-	right: number,
-}
-
-interface SizedImageStyle extends ImageStyle {
-	width: number,
-	height: number,
-}
+} from 'react-native';
 
 export interface ImageSourceStyle {
-	source: ImageRequireSource,
-	style:  ImageStyle,
+	source: ImageRequireSource;
+	style: ImageStyle;
 }
 
 interface Props {
-	style: ViewStyle,
-	wrapperStyle: any, // PositionedViewStyle,
-	imageStyle: any, // SizedImageStyle,
-	images: ImageSourceStyle[],
+	style: ViewStyle;
+	wrapperStyle: any;
+	imageStyle: any;
+	images: ImageSourceStyle[];
 }
 
 export default class CompositeImage extends Component<Props> {
-	
-	render () {
-		let count = 0
+	render() {
+		const {
+			style,
+			wrapperStyle,
+			imageStyle,
+			images
+		} = this.props;
 		return (
-			<View style={this.props.style}>
-				{ this.props.images.map (image => (
-					<View key={`img_${++count}`}
-						style={this.props.wrapperStyle}>
-						<Image
-							style={[this.props.imageStyle, image.style]}
-							source={image.source}
-						/>
+			<View style={style}>
+				{images.map((image: ImageSourceStyle, index: number) => (
+					<View key={`img_${index}`} style={wrapperStyle}>
+						<Image style={[imageStyle, image.style]} source={image.source} />
 					</View>
 				))}
 			</View>
-		)
+		);
 	}
 }
