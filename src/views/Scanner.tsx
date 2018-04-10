@@ -5,7 +5,7 @@ import {
 } from 'react-native'
 
 import {
-	ChestContent,
+	GameItems,
 	ChestContentWatcher,
 	openChest,
 } from '../utils/Firebase'
@@ -24,7 +24,7 @@ interface Props {
 	chestId: string,
 }
 interface State {
-	content?: ChestContent,
+	items?: GameItems,
 	error?: Error,
 }
 
@@ -38,7 +38,7 @@ export default class Scanner extends Component<Props, State> {
 		super (props)
 		this.state = {}
 		this.contentWatcher = new ChestContentWatcher ({
-			onSuccess: (content) => this.setState ({ content }),
+			onSuccess: (items) => this.setState ({ items }),
 			onError: (error) => this.setState ({ error })
 		})
 	}
@@ -59,7 +59,7 @@ export default class Scanner extends Component<Props, State> {
 
 	render () {
 		const {
-			content,
+			items,
 			error,
 		} = this.state
 
@@ -69,18 +69,18 @@ export default class Scanner extends Component<Props, State> {
 			}), 2000)
 		}
 
-		if (! content) return (
+		if (! items) return (
 			<SimpleText text={'Chest Unopened'} />
 		)
 
-		const message = `Chest ${(content) ? 'Opened' : 'Unopened'}`
+		const message = `Chest ${(items) ? 'Opened' : 'Unopened'}`
 
 		return (
 			<View style={styles.container}>
 				<SimpleText text={message} />
 				<ItemCounts 
 					style={{ flex: 6 }} 
-					items={content.items} 
+					items={items} 
 				/>
 			</View>
 		)

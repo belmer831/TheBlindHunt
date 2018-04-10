@@ -141,8 +141,6 @@ export default class Detector extends Component<Props, State> {
 		if (chestId) Actions.Scanner ({ chestId })
 	}
 
-
-
 	/* Center Chest ID
 		- Scanner requires a specific chest
 		- If this is defined then it's possible to Scan then the Scan Button will appear.
