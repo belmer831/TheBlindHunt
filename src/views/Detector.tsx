@@ -79,6 +79,11 @@ interface State {
 	error?:  Error,
 }
 
+/* Process Chests
+	- Calculates the bearing and distance of each chest.
+	- Also determines the zone to be rendered.
+	- This is all added to the existing chest data.
+*/
 export function processChests (chests: ChestData[], coords: LatLng) {
 	return ( chests
 		.map (chest => {
@@ -136,6 +141,8 @@ export default class Detector extends Component<Props, State> {
 		if (chestId) Actions.Scanner ({ chestId })
 	}
 
+
+
 	/* Center Chest ID
 		- Scanner requires a specific chest
 		- If this is defined then it's possible to Scan then the Scan Button will appear.
@@ -145,9 +152,9 @@ export default class Detector extends Component<Props, State> {
 		let centerId: string | undefined
 
 		proChests.forEach (chest => {
-			const { zone, chestId } = chest
+			const { zone, id } = chest
 			if (zone.source === RADAR.CENTER) {
-				centerId = chestId
+				centerId = id
 			}
 		})
 
@@ -190,7 +197,7 @@ export default class Detector extends Component<Props, State> {
 			chests,
 			error,
 		} = this.state
-
+		
 		if (error) {
 			setInterval (() => this.setState ({ 
 				error: undefined
