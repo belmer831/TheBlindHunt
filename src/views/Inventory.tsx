@@ -8,6 +8,9 @@ import {
 	Image,
 	ImageRequireSource,
 	TouchableOpacity,
+	Animated,
+	PanResponder,
+	PanResponderInstance,
 } from 'react-native'
 
 import { Actions } from 'react-native-router-flux'
@@ -25,9 +28,20 @@ const WINDOW_HEIGHT = Dimensions.get('window').height
 const WINDOW_WIDTH  = Dimensions.get('window').width
 const SIZE = WINDOW_WIDTH / 5
 
+interface GameItemEntry {
+	key:  string,
+	val?: ImageRequireSource,
+}
+
 interface Props {}
 interface State {
-	items?: GameItems,
+	drag?: {
+		item: GameItemEntry,
+		position: Animated.ValueXY,
+
+	}
+	coins?: number,
+	items?: GameItemEntry[],
 	error?: Error,
 }
 
@@ -119,9 +133,38 @@ export default class Inventory extends Component<Props, State> {
 		this.state = {}
 
 		this.inventoryWatcher = new InventoryWatcher ({
-			onSuccess: (items) => this.setState ({ items }),
+			onSuccess: (items) => this.onInventoryChange (items),
 			onError:   (error) => this.setState ({ error }),
 		})
+	}
+
+	onInventoryChange (gameItems: GameItems) {
+		let items: GameItemEntry[] = []
+
+		items = Object.keys (gameItems)
+			.filter (key => (key !== 'Coins'))
+			.map (key => ({
+				key, 
+				val: gameItems[key]
+			}))
+			.reduce ((list, entry) => {
+				for (let i = 0; i < entry.val; i++) {
+					const key = `${entry.key}_${i}`
+					const val = findItemImage (entry.key)
+					if (val) list.push ({ key, val })
+				}
+				return list
+			}, [] as Entry<ImageRequireSource>[])
+		
+		let idx = 0
+		while (items.length < 9) items.push ({
+			key: `empty_${idx++}`
+		})
+
+		if (items.length > 9) items = items.slice (0, 9)
+
+		this.setState ({ coins: gameItems.Coins })
+		this.setState ({ items })
 	}
 
 	componentDidMount () {
@@ -138,6 +181,7 @@ export default class Inventory extends Component<Props, State> {
 
 	render () {
 		const {
+			coins,
 			items,
 			error,
 		} = this.state
@@ -153,30 +197,6 @@ export default class Inventory extends Component<Props, State> {
 			<SimpleText text='Missing Items' />
 		)
 
-		let itemList: Entry<ImageRequireSource|null>[] = []
-
-		itemList = Object.keys (items)
-			.filter (key => (key !== 'Coins'))
-			.map (key => ({
-				key, 
-				val: items[key]
-			}))
-			.reduce ((list, entry) => {
-				for (let i = 0; i < entry.val; i++) {
-					const key = `${entry.key}_${i}`
-					const val = findItemImage (entry.key)
-					if (val) list.push ({ key, val })
-				}
-				return list
-			}, [] as Entry<ImageRequireSource>[])
-		
-		let idx = 0
-		while (itemList.length > 9) itemList.pop()
-		while (itemList.length < 9) itemList.push ({
-			key: `empty_${idx++}`,
-			val: null,
-		})
-
 		return (
 			<View style={styles.container}>
 				<View style={styles.row}>
@@ -187,7 +207,7 @@ export default class Inventory extends Component<Props, State> {
 							resizeMode='contain'
 						/>
 						<Text style={styles.text}>
-							{ items.Coins }
+							{ coins }
 						</Text>
 					</View>
 				</View>
@@ -195,7 +215,7 @@ export default class Inventory extends Component<Props, State> {
 				<View style={styles.listOuter}>
 					<FlatList
 						contentContainerStyle={styles.listInner}
-						data={itemList}
+						data={items}
 						keyExtractor={entry => entry.key}
 						numColumns={3}
 						renderItem={ ({ item }) =>
