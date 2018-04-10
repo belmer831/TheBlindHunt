@@ -43,7 +43,7 @@ export default class InventoryLogs extends Component<Props, State> {
 
 		this.inventoryWatcher = new InventoryWatcher ({
 			onSuccess: (items) => this.setState ({ items }),
-			onError:   (error) => this.setState ({ error })
+			onError:   (error) => this.setState ({ error }),
 		})
 	}
 
@@ -61,7 +61,12 @@ export default class InventoryLogs extends Component<Props, State> {
 			error,
 		} = this.state
 
-		if (error) throw error
+		if (error) {
+			setInterval (() => {
+				this.setState ({ error: undefined })
+			}, 2000)
+			return <SimpleText text={error.message} />
+		}
 
 		if (! items) return (
 			<SimpleText text={'Missing Items'} />
