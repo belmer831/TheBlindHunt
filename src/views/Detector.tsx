@@ -19,7 +19,7 @@ import { calcBetween } from '../utils/Coords'
 import { LocationWatcher } from '../utils/Location'
 import { ZoneData, findZone } from '../utils/Zones'
 import CompositeImage, { 
-	ImageSourceStyle 
+	CompositeImageItem 
 } from '../components/CompositeImage'
 import {
 	updateLocation,
@@ -170,7 +170,7 @@ export default class Detector extends Component<Props, State> {
 	private formatZones (proChests: ProChest[]) {
 		const { facing } = this.state
 
-		const zones: ImageSourceStyle[] = proChests.map (chest => {
+		const zones: CompositeImageItem[] = proChests.map (chest => {
 			const { source, rotation } = chest.zone
 			const style = {
 				tintColor: THIN_RED,

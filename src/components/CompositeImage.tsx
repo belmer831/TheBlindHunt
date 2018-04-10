@@ -22,7 +22,7 @@ interface SizedImageStyle extends ImageStyle {
 	height: number,
 }
 
-export interface ImageSourceStyle {
+export interface CompositeImageItem {
 	source: ImageRequireSource,
 	style:  ImageStyle,
 }
@@ -31,7 +31,7 @@ interface Props {
 	style: ViewStyle,
 	wrapperStyle: any, // PositionedViewStyle,
 	imageStyle: any, // SizedImageStyle,
-	images: ImageSourceStyle[],
+	images: CompositeImageItem[],
 }
 
 export default class CompositeImage extends Component<Props> {
