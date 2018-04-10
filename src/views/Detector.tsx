@@ -132,8 +132,55 @@ export default class Detector extends Component<Props, State> {
 		Compass.stop()
 	}
 
-	toScanner (chestId?: string) {
+	private toScanner (chestId?: string) {
 		if (chestId) Actions.Scanner ({ chestId })
+	}
+
+	/* Center Chest ID
+		- Scanner requires a specific chest
+		- If this is defined then it's possible to Scan then the Scan Button will appear.
+		- Iterate through proChests to find which if any chest is in the center.
+	*/
+	private findCenterChestId (proChests: ProChest[]) {
+		let centerId: string | undefined
+
+		proChests.forEach (chest => {
+			const { zone, chestId } = chest
+			if (zone.source === RADAR.CENTER) {
+				centerId = chestId
+			}
+		})
+
+		return centerId
+	}
+
+	/* Zones
+		- These are all the images that need to be rendered in CompositeImage.
+		- Includes every chest, the frame, and the north arrow.
+		- Every image needs to be rotated by facing to account for the compass.
+		- The chest images also need to be rotated to account for the multiple different zones each source image can represent.
+	*/
+	private formatZones (proChests: ProChest[]) {
+		const { facing } = this.state
+
+		const zones: ImageSourceStyle[] = proChests.map (chest => {
+			const { source, rotation } = chest.zone
+			const style = {
+				tintColor: THIN_RED,
+				transform: [{ rotateZ: `${(rotation + facing)}deg` }]
+			}
+			return { source, style }
+		})
+
+		const baseZones = [ RADAR.ARROW, RADAR.FRAME ]
+		baseZones.forEach (src => {
+			zones.unshift ({
+				source: src,
+				style: { transform: [{ rotateZ: `${facing}deg` }]}
+			})
+		})
+
+		return zones
 	}
 
 	render () {
@@ -160,43 +207,8 @@ export default class Detector extends Component<Props, State> {
 		)
 
 		const proChests = processChests (chests, coords)
-		
-		/* Center Chest ID
-			- Scanner requires a specific chest
-			- If this is defined then it's possible to Scan then the Scan Button will appear.
-			- Iterate through proChests to find which if any chest is in the center.
-		*/
-		let centerChestId: string | undefined
-
-		proChests.forEach (chest => {
-			const { zone, chestId } = chest
-			if (zone.source === RADAR.CENTER) {
-				centerChestId = chestId
-			}
-		})
-		
-		/* Zones
-			- These are all the images that need to be rendered in CompositeImage.
-			- Includes every chest, the frame, and the north arrow.
-			- Every image needs to be rotated by facing to account for the compass.
-			- The chest images also need to be rotated to account for the multiple different zones each source image can represent.
-		*/
-		const zones:ImageSourceStyle[] = proChests.map (chest => {
-			const { source, rotation } = chest.zone
-			const style = {
-				tintColor: THIN_RED,
-				transform: [{ rotateZ: `${(rotation + facing)}deg` }]
-			}
-			return { source, style }
-		})
-
-		const baseZones = [ RADAR.ARROW, RADAR.FRAME ]
-		baseZones.forEach (src => {
-			zones.unshift ({
-				source: src,
-				style: { transform: [{ rotateZ: `${facing}deg` }]}
-			})
-		})
+		const centerId = this.findCenterChestId (proChests)
+		const zones = this.formatZones (proChests)
 		
 		return (
 			<View style={styles.container}>
@@ -207,10 +219,10 @@ export default class Detector extends Component<Props, State> {
 					images={zones}
 				/>
 				<View style={styles.bottom}>
-					{ (centerChestId) ? 
+					{ (centerId) ? 
 						<ClearButton
 							text={'Scan'}
-							onPress={() => this.toScanner (centerChestId)}
+							onPress={() => this.toScanner (centerId)}
 						/>
 						:
 						undefined 
