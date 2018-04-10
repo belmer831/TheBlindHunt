@@ -19,9 +19,11 @@ export interface Events<T> {
 	onError:   Callback<Error>
 }
 
+// TODO: Enumerate items
+// TODO: Possibly refractor so coins are seperate from other items
 export interface GameItems {
-	Coins: number,
-	[key:string]: number,
+	coins: number,
+	[key: string]: number,
 }
 
 export interface ChestContent {
@@ -30,7 +32,7 @@ export interface ChestContent {
 }
 
 export interface ChestData extends LatLng {
-	chestId: string,
+	id: string,
 }
 
 export interface Entry<T> {
@@ -42,6 +44,7 @@ export function exists (thing:any) {
 	return (! (! thing))
 }
 
+// TODO: Clean Up?
 export function getEntries (snapshot: DataSnapshot): Entry<any>[] {
 	if (! snapshot.exists()) throw new Error ("Snapshot does not exist")
 	if (typeof snapshot !== 'object') throw new Error ("Snapshot is not an object")
@@ -53,67 +56,52 @@ export function getEntries (snapshot: DataSnapshot): Entry<any>[] {
 	}))
 }
 
-export function getCurrentUser () {
+/* Find Current User
+	- Returns the database reference for the current user.
+*/
+export function findCurrentUser () {
+
 	const { currentUser } = RNFirebase.auth()
 	if (! currentUser) throw new Error ("No Current User")
-	return currentUser
-}
 
-export function getUserData (child?: string) {
 	let data = RNFirebase.database().ref()
-		.child ('UserData')
-		.child (getCurrentUser().uid)
-
-	if (child) data = data.child (child)
+		.child ('Users')
+		.child (currentUser.uid)
 
 	return data
 }
 
-/* NOTE: Probably unnecessary
-export async function ensureRegistration () {
-	const currentUser = getCurrentUser()
-	const userRef = RNFirebase.database().ref()
-		.child ('Users')
-		.child (currentUser.uid)
-	
-	const userSnap = await userRef.once ('value')
-	if (! userSnap.exists ()) {
-		await userRef.set ({
-			Email: currentUser.email,
-			Name:  currentUser.displayName,
-		})
-	}
-}
+/* Update Location
+	- Sets current user's location to the provided coordinates.
 */
-
-/* NOTE: Probably unnecessary 
-*/
-export async function setupUserChests () {
-	const snapshot = await getUserData ('Chests').once ('value')
-	if (! snapshot.exists ()) {
-		// TODO: I don't know why this is this way
-		getUserData ('Location').remove()
-	}
-}
-/*
-*/
-
-export async function updateLocation (coords:LatLng) {
-	return getUserData ('Location').set ({
-		Latitude: coords.latitude,
-		Longitude: coords.longitude,
+export async function updateLocation (coords: LatLng): Promise<void> {
+	return findCurrentUser().child ('location').set ({
+		latitude: coords.latitude,
+		longitude: coords.longitude,
 	})
 }
 
+/* Open Chest
+	- 
+*/
 export async function openChest (chestId: string): Promise<void> {
-	const wasOpenedRef = getUserData ('Chests')
+	const wasOpenedRef = findCurrentUser().child ('chests')
 		.child (chestId)
-		.child ('Properties')
-		.child ('WasOpened')
+		.child ('properties')
+		.child ('wasOpened')
 	
 	return wasOpenedRef.set (true)
 }
 
+/* Abstract Firebase Watcher
+	- Template for all Firebase database watchers.
+	- onSuccess: The callback for a successful update and processing from the database.
+	- onError: The callback if an error is encountered anywhere in the class.
+	- onChange: is used to process the snapshot into a known format. It also acts as the ID for the listener.
+	- ref: The path to the node reference in the RNRF database.
+	- start: Async call to start the watcher.
+	- end: Async call to end the watcher.
+*/
 export abstract class FirebaseWatcher<T> {
 	onSuccess: Callback<T>
 	onError:   Callback<Error>
@@ -128,32 +116,38 @@ export abstract class FirebaseWatcher<T> {
 		this.onChange = this.onChange.bind (this)
 	}
 
-	abstract onChange (snapshot:DataSnapshot): void
+	abstract onChange (snapshot: DataSnapshot): void
 	abstract ref (): Reference
 
 	async start () {
 		this.ref().on ('value', this.onChange, (err) => this.onError(err))
 	}
 
+	// TODO: This is causing a warning when switching away from a component that calls with before unmounting.
 	async end () {
 		this.ref().on ('value', this.onChange, (err) => this.onError(err))
 	}
 }
 
+/* Inventory Watcher
+	- Watches the user's inventory and returns a map of item names to the amount the user has of that item.
+*/
 export class InventoryWatcher extends FirebaseWatcher<GameItems> {
+	
 	ref () {
-		return getUserData ('Inventory')
+		return findCurrentUser().child ('inventory')
 	}
 
+	// TODO: Fix for database changes
 	onChange (snapshot: DataSnapshot) {
 		try {
 			let items: GameItems = {
-				Coins: 0,
+				coins: 0,
 			}
 			
 			if (snapshot.exists ()) {
-				const coinSnap = snapshot.child ('Coins')
-				const itemsSnap = snapshot.child ('Items')
+				const coinSnap = snapshot.child ('coins')
+				const itemsSnap = snapshot.child ('items')
 
 				if (coinSnap.exists()) items.Coins = coinSnap.val()
 				
@@ -171,23 +165,27 @@ export class InventoryWatcher extends FirebaseWatcher<GameItems> {
 	}
 }
 
-export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
+export class ChestContentWatcher extends FirebaseWatcher<GameItems> {
+	
 	ref () {
-		return getUserData ('ChestContent') 
+		return findCurrentUser().child ('chestContent') 
 	}
 
+	// TODO: Fix for database changes
 	onChange (snapshot: DataSnapshot) {
 		try {
 			if (! snapshot.exists()) throw new Error ("No Snapshot")
 
 			let items: GameItems = {
-				Coins: 0,
+				coins: 0,
 			}
 
-			const id = snapshot.child ('ChestID').val() as string
-			items.Coins = snapshot.child ('Coins').val() as number
+			// TODO: Should there be an id in chestContent
+			// const id = snapshot.child ('ChestID').val() as string
 
-			getEntries (snapshot.child ('Items')).forEach (entry => {
+			items.coins = snapshot.child ('coins').val() as number
+
+			getEntries (snapshot.child ('items')).forEach (entry => {
 				try {
 					const { key, val } = entry
 					items[key] = val
@@ -195,7 +193,7 @@ export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 				catch {}
 			})
 
-			this.onSuccess ({ id, items })
+			this.onSuccess (items)
 		}
 		catch (error) {
 			this.onError (error)
@@ -204,9 +202,11 @@ export class ChestContentWatcher extends FirebaseWatcher<ChestContent> {
 }
 
 export class ChestDataWatcher extends FirebaseWatcher<ChestData[]> {
+	
+	// TODO: Fix for database changes
+	// NOTE: Temporary workaround using all chests
 	ref () {
-		return getUserData ('Chests')
-		// return RNFirebase.database().ref().child ('Chests')
+		return findCurrentUser().child ('chests')
 	}
 
 	onChange (snapshot: DataSnapshot) {
@@ -216,12 +216,9 @@ export class ChestDataWatcher extends FirebaseWatcher<ChestData[]> {
 			const chests = getEntries (snapshot)
 				.map (entry => {
 					try {
-						const { Latitude, Longitude } = entry.val
-						return {
-							chestId: entry.key,
-							latitude: Latitude,
-							longitude: Longitude,
-						}
+						const id = entry.key
+						const { latitude, longitude } = entry.val
+						return { id, latitude, longitude }
 					}
 					catch { return null }
 				})
