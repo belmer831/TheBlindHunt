@@ -39,7 +39,7 @@ const styles = StyleSheet.create ({
 		fontSize: 20,
 		color: 'whitesmoke',
 	},
-	navbar: { // SHOULD NOT EXIST
+	navbar: { // NOTE: Hack for hiding navbar
 		height: 0,
 		alignItems: 'center',
 		justifyContent: 'center',
