@@ -1,4 +1,4 @@
-import React, { Component } from 'react';/*
+import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
 
 // TODO: Fix broken types
@@ -6,20 +6,15 @@ import * as RNRF from 'react-native-router-flux';
 const Router: any = RNRF.Router;
 const Scene: any = RNRF.Scene;
 const Stack: any = RNRF.Stack;
-const Tabs: any = RNRF.Tabs;*/
+const Tabs: any = RNRF.Tabs;
 
 import { GoogleSignin } from 'react-native-google-signin';
 import Firebase from 'react-native-firebase';
 
 import { LocationPermission } from './utils/Permissions';
-import { User } from './utils/Firebase';
 
 import Loading from './views/Loading';
-import MapGrid from './components/MapGrid';
-import { LatLng } from 'react-native-maps';
-import { CurrentLocation } from './utils/Location';
-import { RINGS } from './utils/Zones';
-/*
+
 import Login from './views/Login';
 
 import Scanner from './views/Scanner';
@@ -29,7 +24,8 @@ import InventoryLogs from './views/InventoryLogs';
 
 import Detector from './views/Detector';
 import DetectorLogs from './views/DetectorLogs';
-/*
+import { User } from './utils/User';
+
 const styles = StyleSheet.create({
 	text: {
 		textAlign: 'center',
@@ -48,14 +44,14 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(0,0,0,1)',
 	},
 });
-*/
+
 interface Props { }
 interface State {
 	ready: boolean;
 	user?: User;
 	error?: Error;
 }
-/*
+
 const TabProps = {
 	swipeEnabled: true,
 	showLabel: true,
@@ -64,9 +60,8 @@ const TabProps = {
 	labelStyle: styles.text,
 	inactiveBackgroundColor: 'grey'
 };
-*/
+
 export default class App extends Component<Props, State> {
-	mOrigin: LatLng;
 	private authSubscription?: Function;
 
 	public constructor(props: Props) {
@@ -82,7 +77,6 @@ export default class App extends Component<Props, State> {
 
 		if(!LocationPermission.isGranted()) await LocationPermission.request();
 		if(!LocationPermission.isGranted()) throw new Error('Location Permission Required');
-		this.mOrigin = (await CurrentLocation()).coords;
 	}
 
 	public componentDidMount() {
@@ -101,7 +95,7 @@ export default class App extends Component<Props, State> {
 	public render() {
 		const {
 			ready,
-			//user,
+			user,
 			error,
 		} = this.state;
 
@@ -109,7 +103,7 @@ export default class App extends Component<Props, State> {
 
 		if(!ready) return <Loading />;
 
-		return <MapGrid origin={this.mOrigin} radius={RINGS.LARGE} />;/*(
+		return (
 			<Router navigationBarStyle={styles.navbar} title={styles.text}>
 				<Scene key='root'>
 					<Stack key='Auth' initial={(!user)}>
@@ -126,6 +120,6 @@ export default class App extends Component<Props, State> {
 					</Stack>
 				</Scene>
 			</Router>
-		);*/
+		);
 	}
 }

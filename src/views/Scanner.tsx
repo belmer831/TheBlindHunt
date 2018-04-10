@@ -4,14 +4,11 @@ import {
 	StyleSheet,
 } from 'react-native';
 
-import {
-	ChestContent,
-	ChestContentWatcher,
-	openChest,
-} from '../utils/Firebase';
+import { ChestContentWatcher, GameItems } from '../utils/Firebase';
 
 import ItemCounts from '../components/ItemCounts';
 import SimpleText from '../components/SimpleText';
+import { User } from '../utils/User';
 
 const styles = StyleSheet.create({
 	container: {
@@ -24,7 +21,7 @@ interface Props {
 	chestId: string;
 }
 interface State {
-	content?: ChestContent;
+	content?: GameItems;
 	error?: Error;
 }
 
@@ -38,13 +35,13 @@ export default class Scanner extends Component<Props, State> {
 		super(props);
 		this.state = {};
 		this.contentWatcher = new ChestContentWatcher(
-			(content: ChestContent) => this.setState({ content }),
+			(content) => this.setState({ content }),
 			(error) => this.setState({ error })
 		);
 	}
 
 	async onMount() {
-		await openChest(this.props.chestId);
+		await User.OpenChest(this.props.chestId);
 		await this.contentWatcher.Start();
 	}
 
@@ -80,7 +77,7 @@ export default class Scanner extends Component<Props, State> {
 				<SimpleText text={message} />
 				<ItemCounts
 					style={{ flex: 6 }}
-					items={content.items}
+					gameItems={content}
 				/>
 			</View>
 		);

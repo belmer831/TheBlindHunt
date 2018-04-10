@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-
-import {
-	GameItems,
-	InventoryWatcher,
-} from '../utils/Firebase';
+import { GameItems, InventoryWatcher } from '../utils/Firebase';
 import ItemCounts from '../components/ItemCounts';
 import SimpleText from '../components/SimpleText';
 
@@ -41,7 +37,7 @@ export default class InventoryLogs extends Component<Props, State> {
 		if(!items) return <SimpleText text={'Missing Items'} />;
 
 		return (
-			<ItemCounts style={{ flex: 1 }} items={items} />
+			<ItemCounts style={{ flex: 1 }} gameItems={items} />
 		);
 	}
 }

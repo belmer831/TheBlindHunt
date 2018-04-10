@@ -12,14 +12,14 @@ import { RADAR } from '../assets';
 import SimpleText from '../components/SimpleText';
 import ClearButton from '../components/ClearButton';
 import { calcBetween } from '../utils/Coords';
-import LocationWatcher from '../utils/Location';
-import { ZoneData, findZone } from '../utils/Zones';
+import LocationWatcher, { CurrentLocation } from '../utils/Location';
+import { findZone, RINGS, ZoneData } from '../utils/Zones';
 import CompositeImage, { ImageSourceStyle } from '../components/CompositeImage';
-import {
-	updateLocation,
-	ChestDataWatcher,
-	ChestData,
-} from '../utils/Firebase';
+import { ChestDataWatcher, ChestData } from '../utils/Firebase';
+import MapGrid from '../components/MapGrid';
+import { Dictionary } from 'lodash';
+import _ from 'lodash';
+import { User } from '../utils/User';
 
 const THIN_RED = 'rgba(243,53,6,0.5)';
 
@@ -57,33 +57,29 @@ const styles = StyleSheet.create({
 		paddingBottom: 40,
 	},
 });
-
 interface ProChest extends ChestData {
 	bearing: number;
 	distance: number;
 	zone: ZoneData;
 }
-
 interface Props { }
 interface State {
 	facing: number;
 	coords?: LatLng;
-	chests?: ChestData[];
+	chests?: Dictionary<ChestData>;
 	error?: Error;
 }
 
-export function processChests(chests: ChestData[], coords: LatLng) {
-	return (chests
-		.map(chest => {
-			const { bearing, distance } = calcBetween(coords, chest);
-			const zone = findZone(bearing, distance);
-			return { bearing, distance, zone, ...chest };
-		})
-		.filter(proChest => (proChest.zone !== null)) as ProChest[]
-	);
+export function processChests(chests: Dictionary<ChestData>, coords: LatLng) {
+	return _.map(chests, (chest) => {
+		const { bearing, distance } = calcBetween(coords, chest);
+		const zone = findZone(bearing, distance);
+		return { bearing, distance, zone, ...chest };
+	}).filter((chest) => (chest.zone !== null)) as ProChest[];
 }
 
 export default class Detector extends Component<Props, State> {
+	mOrigin: any;
 	private readonly chestsWatcher: ChestDataWatcher;
 	private readonly locationWatcher: LocationWatcher;
 
@@ -93,9 +89,7 @@ export default class Detector extends Component<Props, State> {
 		this.locationWatcher = new LocationWatcher(
 			({ coords }) => {
 				this.setState({ coords });
-
-				updateLocation(coords)
-					.catch(error => this.setState({ error }));
+				User.UpdateLocation(coords).catch((error: Error) => this.setState({ error }));
 			},
 			(error) => this.setState({ error })
 		);
@@ -106,6 +100,11 @@ export default class Detector extends Component<Props, State> {
 		);
 
 		this.state = { facing: 0 };
+		this.GetOrigin();
+	}
+
+	private async GetOrigin() {
+		this.mOrigin = (await CurrentLocation()).coords;
 	}
 
 	public componentDidMount() {
@@ -129,7 +128,7 @@ export default class Detector extends Component<Props, State> {
 		} = this.state;
 
 		if(error) {
-			setInterval(() => this.setState({ error: undefined }), 2000);
+			setTimeout(() => this.setState({ error: undefined }), 2000);
 			return <SimpleText text={error.message} />;
 		}
 
@@ -158,10 +157,10 @@ export default class Detector extends Component<Props, State> {
 
 		return (
 			<View style={styles.container}>
+				<MapGrid origin={this.mOrigin} radius={RINGS.LARGE} />
 				<CompositeImage style={styles.middle} wrapperStyle={styles.overlay} imageStyle={styles.pieslice} images={zones} />
 				<View style={styles.bottom}>
 					{(centerChestId) ?
-						// tslint:disable-next-line:jsx-no-lambda
 						<ClearButton text={'Scan'} onPress={() => Actions.Scanner({ centerChestId })} />
 						:
 						undefined
